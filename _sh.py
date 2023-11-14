@@ -384,7 +384,7 @@ def spherical_harmonics(band: int, order: int, costheta: np.ndarray,
 
 
 @njit(cache=True)
-def sph_harm(band: int, order: int, costheta: np.ndarray, sintheta: np.ndarray,
+def sph_harm_old(band: int, order: int, costheta: np.ndarray, sintheta: np.ndarray,
              phi: np.ndarray) -> np.float32:
     # Numpy optimized function
 

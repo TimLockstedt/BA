@@ -959,7 +959,7 @@ def get_array(dict_cache, key):
     return dict_cache[tuple(key)]
 
 
-def kegel_from_dict(dict_cache={}, factor=10, x_koord=0, y_koord=0, z_koord=0, alpha=np.array([]), beta=np.array([]), paralell_bool=False):
+def kegel_from_dict(dict_cache={}, factor=10, x_koord=0, y_koord=0, z_koord=0, alpha=np.array([]), beta=np.array([]), paralell_bool=False, get_phi_theta = False):
     # Winkelfunktionen vordefinieren
     cos_alpha = np.cos(alpha)
     sin_alpha = np.sin(alpha)
@@ -981,7 +981,14 @@ def kegel_from_dict(dict_cache={}, factor=10, x_koord=0, y_koord=0, z_koord=0, a
     result[:,0,:] += x_koord
     result[:,1,:] += y_koord
     result[:,2,:] += z_koord
-    
+    if get_phi_theta == True:
+        # Phi und Theta berechnen für ODFs
+        phi = np.arccos(z)
+        theta = np.arctan2(y,x)
+        costheta = np.cos(theta)
+        sintheta = np.sin(theta)
+        return (result, phi, costheta, sintheta)
+
     return result
 
 
