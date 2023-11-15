@@ -365,7 +365,7 @@ def _spherical_harmonics_band12(order: int, costheta: np.ndarray,
 
 
 @njit(cache=True)
-def spherical_harmonics(band: int, order: int, costheta: np.ndarray,
+def spherical_harmonics1(band: int, order: int, costheta: np.ndarray,
                         sintheta: np.ndarray, phi: np.ndarray) -> np.float32:
     if band == 0:
         return _spherical_harmonics_band0(order, costheta, sintheta, phi)
@@ -635,3 +635,36 @@ def sph_harm(band: int, order: int, costheta: np.ndarray, sintheta: np.ndarray,
         return _spherical_harmonics_band11(order, costheta, sintheta, phi)
     if band == 12:
         return _spherical_harmonics_band12(order, costheta, sintheta, phi)
+    
+@njit(cache=True)
+def spherical_harmonics(band: int, order: int, costheta: np.ndarray, sintheta: np.ndarray,
+             phi: np.ndarray) -> np.float32:
+    # Numpy optimized function
+
+    if band == 0:
+        return _spherical_harmonics_band0(order, costheta, sintheta, phi)
+    if band == 1:
+        return _spherical_harmonics_band1(order, costheta, sintheta, phi)
+    if band == 2:
+        return _spherical_harmonics_band2(order, costheta, sintheta, phi)
+    if band == 3:
+        return _spherical_harmonics_band3(order, costheta, sintheta, phi)
+    if band == 4:
+        return _spherical_harmonics_band4(order, costheta, sintheta, phi)
+    if band == 5:
+        return _spherical_harmonics_band5(order, costheta, sintheta, phi)
+    if band == 6:
+        return _spherical_harmonics_band6(order, costheta, sintheta, phi)
+    if band == 7:
+        return _spherical_harmonics_band7(order, costheta, sintheta, phi)
+    if band == 8:
+        return _spherical_harmonics_band8(order, costheta, sintheta, phi)
+    if band == 9:
+        return _spherical_harmonics_band9(order, costheta, sintheta, phi)
+    if band == 10:
+        return _spherical_harmonics_band10(order, costheta, sintheta, phi)
+    if band == 11:
+        return _spherical_harmonics_band11(order, costheta, sintheta, phi)
+    if band == 12:
+        return _spherical_harmonics_band12(order, costheta, sintheta, phi)
+    
