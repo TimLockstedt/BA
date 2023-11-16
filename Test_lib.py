@@ -10,6 +10,7 @@ from time import gmtime, strftime
 from numba import jit, njit
 import pickle 
 import warnings
+import odf
 # from joblib import Parallel, delayed
 
 np.set_printoptions(suppress=False, formatter={'float': '{:0.2e}'.format})
@@ -1115,4 +1116,8 @@ def reverse_rotate_and_translate_data(data, x_koord = 0, y_koord = 0, z_koord = 
     return result
 
 
-
+def get_basis(phi:np.ndarray, costheta:np.ndarray, sintheta:np.ndarray, band:int)->np.ndarray:
+    basis = np.empty((phi.shape[0], odf.get_num_coeff(band)))
+    for i, (p, ct, st) in enumerate(zip(phi, costheta, sintheta)):
+        basis[i, :] = odf._analytic_single_odf(ct, st, p, band)
+    return basis
