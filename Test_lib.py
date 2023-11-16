@@ -10,7 +10,7 @@ from time import gmtime, strftime
 from numba import jit, njit
 import pickle 
 import warnings
-from joblib import Parallel, delayed
+# from joblib import Parallel, delayed
 
 np.set_printoptions(suppress=False, formatter={'float': '{:0.2e}'.format})
 
@@ -975,8 +975,8 @@ def kegel_from_dict(dict_cache={}, factor=10, x_koord=0, y_koord=0, z_koord=0, a
     if paralell_bool == False: # langsamer
         arrays = [dict_cache[tuple(key)] for key in koords_rounded_int]
         result = np.array(arrays)
-    else:
-        result = np.array(Parallel(n_jobs=-1)(delayed(get_array)(dict_cache,key) for key in koords_rounded_int))
+    # else:
+    #     result = np.array(Parallel(n_jobs=-1)(delayed(get_array)(dict_cache,key) for key in koords_rounded_int))
 
     result[:,0,:] += x_koord
     result[:,1,:] += y_koord
