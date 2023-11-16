@@ -22,7 +22,7 @@ def get_num_coeff(bands: int) -> int:
 
 @numba.njit(cache=True)
 def _get_bands_from_coeff(coeff: int) -> int:
-    r = 1 / 2 * (np.sqrt(8 * coeff + 1) - 3)
+    r = 1 / 4 * (np.sqrt(8 * coeff + 1) - 3)
     return int(r)
 
 

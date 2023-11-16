@@ -1087,9 +1087,10 @@ def generate_dict(range_r = 10, factor = 10):
 # anpassung der schnellen ungenauen berechnung der Kegel, da die Funktion zur bewertung der Punlte kontinuiertlich ist.
 def reverse_rotate_and_translate_data(data, x_koord = 0, y_koord = 0, z_koord = 0, alpha = np.array([]), beta = np.array([])):
     # Translation Rückgängig machen
-    data[:,0,:] -= x_koord
-    data[:,1,:] -= y_koord
-    data[:,2,:] -= z_koord
+    data_ = np.copy(data)
+    data_[:,0,:] -= x_koord
+    data_[:,1,:] -= y_koord
+    data_[:,2,:] -= z_koord
     # Für Optimierung Variablen vor definieren
     cos_alpha = np.cos(-alpha)
     sin_alpha = np.sin(-alpha)
@@ -1111,7 +1112,10 @@ def reverse_rotate_and_translate_data(data, x_koord = 0, y_koord = 0, z_koord = 
     rotation_matrix[:, 2, 2] = (cos_alpha*cos_beta).ravel()
     # Wende die Rotationsmatrix auf die Daten an
     # print(rotation_matrix.shape, data.shape)
-    result = np.matmul(rotation_matrix, data)
+    result = np.matmul(rotation_matrix, data_)
+    result[:,0,:] += x_koord
+    result[:,1,:] += y_koord
+    result[:,2,:] += z_koord
 
     return result
 
