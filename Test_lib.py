@@ -973,10 +973,10 @@ def kegel_from_dict(dict_cache={}, factor=10, x_koord=0, y_koord=0, z_koord=0, a
     koords = np.concatenate((x,y,z), axis=1)
     koords_rounded_int = np.array(np.round(koords*factor, 0), dtype=int)
     # Daten aus dem Dict herausholen
-    if paralell_bool == False: # langsamer
+    if paralell_bool == False:
         arrays = [dict_cache[tuple(key)] for key in koords_rounded_int]
         result = np.array(arrays)
-    # else:
+    # else:  # langsamer
     #     result = np.array(Parallel(n_jobs=-1)(delayed(get_array)(dict_cache,key) for key in koords_rounded_int))
 
     result[:,0,:] += x_koord
