@@ -1,3 +1,4 @@
 *.nii
 *.h5
 *.pkl
+*.npy
