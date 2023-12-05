@@ -434,7 +434,7 @@ def _spherical_harmonics_band3(order: int, costheta: np.ndarray,
     elif order == 1:
         return -0.3231801841141506530073941633302585840782616251048394547526171736 * np.cos(1 * phi) * sintheta**1 * (5 * costheta**2 - 1)
     elif order == 2:
-        return -1.0219854764332823633961144917004685914583334526800692886968009525 * np.cos(2 * phi) * sintheta**2 * costheta
+        return 1.0219854764332823633961144917004685914583334526800692886968009525 * np.cos(2 * phi) * sintheta**2 * costheta
     elif order == 3:
         return -0.4172238236327840897244270157367259006570320058395571608870257618 * np.cos(3 * phi) * sintheta**3
     else:
@@ -459,11 +459,11 @@ def _spherical_harmonics_band5(order: int, costheta: np.ndarray,
     elif order == 1:
         return -0.3202816485762151275371614328469480112417620847968919497350785873 * np.cos(1 * phi) * sintheta**1 * (21 * costheta**4 - 14 * costheta**2 +1)
     elif order == 2:
-        return -1.6947711832608992758156915555107691581402474051237216422207819707 * np.cos(2 * phi) * sintheta**2 * (3 * costheta**3 - costheta)
+        return 1.6947711832608992758156915555107691581402474051237216422207819707 * np.cos(2 * phi) * sintheta**2 * (3 * costheta**3 - costheta)
     elif order == 3:
         return -0.3459437191468402131659664204325332115038732323047830745166077847 * np.cos(3 * phi) * sintheta**3 * (9 * costheta**2 - 1)
     elif order == 4:
-        return -1.4677148983057511630520261475288718389353189585615230758714426678 * np.cos(4 * phi) * sintheta**4 * costheta
+        return 1.4677148983057511630520261475288718389353189585615230758714426678 * np.cos(4 * phi) * sintheta**4 * costheta
     elif order == 5:
         return -0.4641322034408581606579986055338926515740066952823028332256981254 * np.cos(5 * phi) * sintheta**5
     else:
@@ -493,15 +493,15 @@ def _spherical_harmonics_band7(order: int, costheta: np.ndarray,
     elif order == 1:
         return -0.0638740922770801477122571557312792869661458407925043305435500595 * np.cos(1 * phi) * sintheta**1 * (429 * costheta**6 - 495 * costheta**4 + 135 * costheta**2 - 5)
     elif order == 2:
-        return -0.1564589338622940336466601309012722127463870021898339353326346607 * np.cos(2 * phi) * sintheta**2 * (143 * costheta**5 - 110 * costheta**3 + 3)
+        return 0.1564589338622940336466601309012722127463870021898339353326346607 * np.cos(2 * phi) * sintheta**2 * (143 * costheta**5 - 110 * costheta**3 + 3)
     elif order == 3:
         return -0.1106331731112456581898019270390303781254863307381815493329215543 * np.cos(3 * phi) * sintheta**3 * (143 * costheta**4 - 66 * costheta**2 + 3)
     elif order == 4:
-        return -0.7338574491528755815260130737644359194676594792807615379357213339 * np.cos(4 * phi) * sintheta**4 * (13 * costheta**3 - 3 * costheta)
+        return 0.7338574491528755815260130737644359194676594792807615379357213339 * np.cos(4 * phi) * sintheta**4 * (13 * costheta**3 - 3 * costheta)
     elif order == 5:
         return -0.3669287245764377907630065368822179597338297396403807689678606669 * np.cos(5 * phi) * sintheta**5 * (13 * costheta**2 - 1)
     elif order == 6:
-        return -1.8709767267129687367616982242380436850686229112083761729823564404 * np.cos(6 * phi) * sintheta**6 * costheta
+        return 1.8709767267129687367616982242380436850686229112083761729823564404 * np.cos(6 * phi) * sintheta**6 * costheta
     elif order == 7:
         return -0.5000395635705506640113342640447765656806814144996103810133057575 * np.cos(7 * phi) * sintheta**7
     else:
@@ -532,23 +532,23 @@ def _spherical_harmonics_band9(order: int, costheta: np.ndarray,
     elif order == -1:
         return 0.0455672854983032341476375999569820208054556536768743750320559596 * np.sin(1 * phi) * sintheta**1 * (2431 * costheta**8 - 4004 * costheta**6 + 2002 * costheta**4 - 308 * costheta**2 + 7)
     elif order == 0:
-        return -0.0096064272643865916229353794428316341491167697712624120527868461 *(12155 * costheta**9 - 25740 * costheta**7 + 18018 * costheta**5 - 4620 * costheta**3 + 315 * costheta)
+        return 0.0096064272643865916229353794428316341491167697712624120527868461 *(12155 * costheta**9 - 25740 * costheta**7 + 18018 * costheta**5 - 4620 * costheta**3 + 315 * costheta)
     elif order == 1:
         return -0.0455672854983032341476375999569820208054556536768743750320559596 * np.cos(1 * phi) * sintheta**1 * (2431 * costheta**8 - 4004 * costheta**6 + 2002 * costheta**4 - 308 * costheta**2 + 7)
     elif order == 2:
-        return -0.4274590280672302136147581203608627232854799752653442454745417967 * np.cos(2 * phi) * sintheta**2 * (221 * costheta**7 - 273 * costheta**5 + 91 * costheta**3 - 7 * costheta)
+        return 0.4274590280672302136147581203608627232854799752653442454745417967 * np.cos(2 * phi) * sintheta**2 * (221 * costheta**7 - 273 * costheta**5 + 91 * costheta**3 - 7 * costheta)
     elif order == 3:
         return -0.3264772254350559025028866699547274085966502805097409468785456354 * np.cos(3 * phi) * sintheta**3 * (221 * costheta**6 - 195 * costheta**4 + 39 * costheta**2 - 1)
     elif order == 4:
-        return -2.8833687833446210757582803523004128600266921958345084054968857487 * np.cos(4 * phi) * sintheta**4 * (17 * costheta**5 - 10 * costheta**3 + costheta)
+        return 2.8833687833446210757582803523004128600266921958345084054968857487 * np.cos(4 * phi) * sintheta**4 * (17 * costheta**5 - 10 * costheta**3 + costheta)
     elif order == 5:
         return -0.3446284861115193998845720691006091383907139257311140884525656505 * np.cos(5 * phi) * sintheta**5 * (85 * costheta**4 - 30 * costheta**2 + 1)
     elif order == 6:
-        return -0.8898269248923924677614393505624882444704249878181247320301403973 * np.cos(6 * phi) * sintheta**6 * (17 * costheta**3 - 3 * costheta)
+        return 0.8898269248923924677614393505624882444704249878181247320301403973 * np.cos(6 * phi) * sintheta**6 * (17 * costheta**3 - 3 * costheta)
     elif order == 7:
         return -0.3853063609640997736718892525212360334540408117067867604508418157 * np.cos(7 * phi) * sintheta**7 * (17 * costheta**2 - 1)
     elif order == 8:
-        return -2.2467028555595648896508338275320720761224249562699080758893668440 * np.cos(8 * phi) * sintheta**8 * costheta
+        return 2.2467028555595648896508338275320720761224249562699080758893668440 * np.cos(8 * phi) * sintheta**8 * costheta
     elif order == 9:
         return -0.5295529414924495795501886531365751707406909126686939033567907635 * np.cos(9 * phi) * sintheta**9
     else:
