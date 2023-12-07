@@ -255,7 +255,7 @@ def get_amplitude(result:np.ndarray, ODFs:np.ndarray, basis:np.ndarray, weights:
 
 def get_basis_xyz_new(x:int, y:int, z:int, band:int=10, factor:int=10):
     phi = np.arccos(z/factor)
-    theta = np.arctan2(y,x) + np.pi/2
+    theta = np.arctan2(y,x)
     costheta = np.cos(theta)
     sintheta = np.sin(theta)
     basis = np.empty((phi.shape[0], odf3.get_num_coeff(band)))
@@ -269,3 +269,24 @@ def generate_dict_basis_new(range_r:int = 10, factor:int = 10, band: int = 10):
     temp_dict = {tuple(a_row): b_row for a_row, b_row in zip(Kugelschale, koords_in_kegel_cache(range_r, alpha, beta))}
     temp_dict_basis = {tuple(a_row): b_row for a_row, b_row in zip(Kugelschale, get_basis_xyz_new(*Kugelschale.T, band, factor))}
     return temp_dict, temp_dict_basis
+
+
+def get_Y_Odfs(bands:int=10):
+    Direction_zero = np.zeros((100,100,100))
+    Inclination_zero = np.copy(Direction_zero)
+    mask = np.ones((100,100,100))
+    for i in range(Direction_zero.shape[0]):
+        for j in range(Direction_zero.shape[1]):
+            for k in range(Direction_zero.shape[2]):
+                if j <= 25 and i <= 27 and i >= 23 and k <= 50:
+                    Direction_zero[i,j,k] = np.pi*(1/2)
+                elif i <= 50 and j <= 50 and k <= 50 and j <= -i+52 and j >= -i+48 and j > 25:
+                    Direction_zero[i,j,k] = np.pi*(1+1/4)
+                elif i <= 50 and j <= 50 and k <= 50 and j <= i+2 and j >= i-2 and j > 25:
+                    Direction_zero[i,j,k] = np.pi*(1-1/4)
+                else:
+                    mask[i,j,k] = 0
+    _ODFs = odf3.compute(Direction_zero[:,:,:,None], Inclination_zero[:,:,:,None], mask[:,:,:,None], bands)
+    return _ODFs
+
+

@@ -233,6 +233,88 @@ def _set_axes_equal(ax):
     ax.set_zlim3d([z_middle - plot_radius, z_middle + plot_radius])
 
 
+# def visualize_odf(coefficients, n_phi, n_theta, scale=1, fig=None, ax=None):
+#     phi, theta = np.mgrid[0 : 2 * np.pi : n_phi * 1j, 0 : np.pi : n_theta * 1j]
+
+#     cos_theta = np.cos(theta)
+#     sin_theta = np.sin(theta)
+
+#     radius = np.empty_like(phi)
+#     bands = _get_bands_from_coeff(coefficients.size)
+
+#     for i, (p, ct, st) in enumerate(
+#         zip(phi.ravel(), cos_theta.ravel(), sin_theta.ravel())
+#     ):
+#         radius.ravel()[i] = (
+#             np.sum(
+#                 np.multiply(
+#                     _analytic_single_odf(ct, st, p, bands),
+#                     coefficients,
+#                 )
+#             )
+#             * scale
+#         )
+
+#     x = radius * np.sin(theta) * np.cos(phi)
+#     y = radius * np.sin(theta) * np.sin(phi)
+#     z = radius * np.cos(theta)
+
+#     flag = False
+#     if fig is None:
+#         fig = plt.figure(figsize=plt.figaspect(0.3))
+#     if ax is None:
+#         flag = True
+#         for count, angle in enumerate([[0,0,0],[0,90,0],[90,0,0]]):
+#             ax = fig.add_subplot(1, 2, count, projection="3d")
+#             ax.plot_surface(x, y, z, color="b", alpha=0.5)
+#             ax.view_init(elev=angle[0], azim=angle[1], roll=angle[2])
+
+#             x_limits = ax.get_xlim3d()
+#             y_limits = ax.get_ylim3d()
+#             z_limits = ax.get_zlim3d()
+
+#             x_range = abs(x_limits[1] - x_limits[0])
+#             x_middle = np.mean(x_limits)
+#             y_range = abs(y_limits[1] - y_limits[0])
+#             y_middle = np.mean(y_limits)
+#             z_range = abs(z_limits[1] - z_limits[0])
+#             z_middle = np.mean(z_limits)
+
+#             # The plot bounding box is a sphere in the sense of the infinity
+#             # norm, hence I call half the max range the plot radius.
+#             plot_radius = 0.5 * max([x_range, y_range, z_range])
+
+#             ax.set_xlim3d([x_middle - plot_radius, x_middle + plot_radius])
+#             ax.set_ylim3d([y_middle - plot_radius, y_middle + plot_radius])
+#             ax.set_zlim3d([z_middle - plot_radius, z_middle + plot_radius])
+#     else:
+#         for count, angle in enumerate([[0,0,0],[0,90,0],[90,0,0]]):
+#             ax[count].plot_surface(x, y, z, color="b", alpha=0.5)
+#             ax[count].view_init(elev=angle[0], azim=angle[1], roll=angle[2])
+
+#             x_limits = ax[count].get_xlim3d()
+#             y_limits = ax[count].get_ylim3d()
+#             z_limits = ax[count].get_zlim3d()
+
+#             x_range = abs(x_limits[1] - x_limits[0])
+#             x_middle = np.mean(x_limits)
+#             y_range = abs(y_limits[1] - y_limits[0])
+#             y_middle = np.mean(y_limits)
+#             z_range = abs(z_limits[1] - z_limits[0])
+#             z_middle = np.mean(z_limits)
+
+#             # The plot bounding box is a sphere in the sense of the infinity
+#             # norm, hence I call half the max range the plot radius.
+#             plot_radius = 0.5 * max([x_range, y_range, z_range])
+
+#             ax[count].set_xlim3d([x_middle - plot_radius, x_middle + plot_radius])
+#             ax[count].set_ylim3d([y_middle - plot_radius, y_middle + plot_radius])
+#             ax[count].set_zlim3d([z_middle - plot_radius, z_middle + plot_radius])
+#     if flag:
+#         _set_axes_equal(ax)
+
+#     return fig, ax
+
 def visualize_odf(coefficients, n_phi, n_theta, scale=1, fig=None, ax=None):
     phi, theta = np.mgrid[0 : 2 * np.pi : n_phi * 1j, 0 : np.pi : n_theta * 1j]
 
@@ -261,7 +343,7 @@ def visualize_odf(coefficients, n_phi, n_theta, scale=1, fig=None, ax=None):
 
     flag = False
     if fig is None:
-        fig = plt.figure()
+        fig = plt.figure(figsize=plt.figaspect(0.3))
     if ax is None:
         ax = fig.add_subplot(111, projection="3d")
         flag = True
@@ -270,6 +352,8 @@ def visualize_odf(coefficients, n_phi, n_theta, scale=1, fig=None, ax=None):
         _set_axes_equal(ax)
 
     return fig, ax
+
+
 
 
 

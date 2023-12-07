@@ -485,7 +485,7 @@ def _spherical_harmonics_band7(order: int, costheta: np.ndarray,
     elif order == -3:
         return 0.1106331731112456581898019270390303781254863307381815493329215543 * np.sin(phi * 3) * sintheta**3 * (143 * costheta**4 - 66 * costheta**2 + 3)
     elif order == -2:
-        return 0.1564589338622940336466601309012722127463870021898339353326346607 * np.sin(phi * 2) * sintheta**2 * (143 * costheta**5 - 110 * costheta**3 + 3)
+        return 0.1564589338622940336466601309012722127463870021898339353326346607 * np.sin(phi * 2) * sintheta**2 * (143 * costheta**5 - 110 * costheta**3 + 15 * costheta)
     elif order == -1:
         return 0.0638740922770801477122571557312792869661458407925043305435500595 * np.sin(phi * 1) * sintheta**1 * (429 * costheta**6 - 495 * costheta**4 + 135 * costheta**2 - 5)
     elif order == 0:
@@ -493,7 +493,7 @@ def _spherical_harmonics_band7(order: int, costheta: np.ndarray,
     elif order == 1:
         return -0.0638740922770801477122571557312792869661458407925043305435500595 * np.cos(1 * phi) * sintheta**1 * (429 * costheta**6 - 495 * costheta**4 + 135 * costheta**2 - 5)
     elif order == 2:
-        return 0.1564589338622940336466601309012722127463870021898339353326346607 * np.cos(2 * phi) * sintheta**2 * (143 * costheta**5 - 110 * costheta**3 + 3)
+        return 0.1564589338622940336466601309012722127463870021898339353326346607 * np.cos(2 * phi) * sintheta**2 * (143 * costheta**5 - 110 * costheta**3 + 15 * costheta)
     elif order == 3:
         return -0.1106331731112456581898019270390303781254863307381815493329215543 * np.cos(3 * phi) * sintheta**3 * (143 * costheta**4 - 66 * costheta**2 + 3)
     elif order == 4:
