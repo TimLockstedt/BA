@@ -271,7 +271,7 @@ def generate_dict_basis_new(range_r:int = 10, factor:int = 10, band: int = 10):
     return temp_dict, temp_dict_basis
 
 
-def get_Y_Odfs(bands:int=10):
+def get_Y_Odfs_old(bands:int=10):
     Direction_zero = np.zeros((100,100,100))
     Inclination_zero = np.copy(Direction_zero)
     mask = np.ones((100,100,100))
@@ -290,3 +290,71 @@ def get_Y_Odfs(bands:int=10):
     return _ODFs
 
 
+def Get_AODF(ODFs:np.ndarray, dict_res:dict, dict_basis:dict, factor:int, x_koord:int, y_koord:int, z_koord:int, bands:int=10, number_of_winkel:int = 1000, factor_amp:int = 1000):
+    # Winkel generieren
+    rng = np.random.default_rng(random.randint(100000,10000000000))
+    beta = np.arccos(1-2*(rng.random(number_of_winkel).reshape(number_of_winkel,1)))
+    alpha = rng.random(number_of_winkel).reshape(number_of_winkel,1)*math.pi*2
+
+    # Punkte im Kegel mit Basisvektoren und Winkeln generieren
+    result, basis, phi, theta = kegel_from_dict_withBasis(dict_res, dict_basis, factor, x_koord, y_koord, z_koord, alpha, beta, True)
+    result_rot = reverse_rotate_and_translate_data(result, x_koord, y_koord, z_koord, alpha, beta)
+    weights = gauss_2d(result_rot[:,1,:], result_rot[:,2,:], y_koord, z_koord, sigma = 2)
+
+    # Mit weights alle punkte im Kegel ablaufen
+    AODF_Amplitude = get_amplitude(result, ODFs, basis, weights)
+
+    ## Scatterplot generieren
+    # x = AODF_Amplitude[:,None] * np.cos(phi) * np.sin(theta)
+    # y = AODF_Amplitude[:,None] * np.sin(phi) * np.sin(theta)
+    # z = AODF_Amplitude[:,None] * np.cos(theta)
+    # fig = plt.figure()
+    # ax = fig.add_subplot(projection = "3d")
+    # n = 10000
+    # ax.scatter(x[:n],y[:n],z[:n])
+    # plt.show()
+
+
+    # num_greater = np.sum(np.rint(AODF_Amplitude[AODF_Amplitude > 0]*100))
+    
+    # num_greater = int(np.sum(np.rint(AODF_Amplitude[AODF_Amplitude > 0]*factor_amp)))
+
+    greater_one = np.where(AODF_Amplitude*factor_amp > 1)[0]
+    multiple_dir = np.repeat(phi[greater_one], np.round(AODF_Amplitude[greater_one] * factor_amp).astype(int))
+    multiple_inc = np.pi/2 - np.repeat(theta[greater_one], np.round(AODF_Amplitude[greater_one] * factor_amp).astype(int))
+
+    # count = 0
+    # for _i,_j in enumerate(AODF_Amplitude):
+    #     for k in range(int(_j*factor_amp if _j > 0 else 0)):
+    #         multiple_dir[count,:] = phi[int(_i)]
+    #         multiple_inc[count,:] = np.pi/2 - theta[int(_i)] 
+    #         count += 1
+ 
+    nan_mask = ~np.isnan(multiple_inc)
+    Test_mask = multiple_inc == 0
+    if str(Test_mask[nan_mask].shape) == "(0,)":
+        return np.empty((1,1,1,odf.get_num_coeff(bands)))
+    AODF_d = odf.compute(np.ravel(multiple_dir[nan_mask])[None,None,None,:],np.ravel(multiple_inc[nan_mask])[None,None,None,:], np.ones(np.ravel(multiple_inc[nan_mask])[None,None,None,:].shape), bands)
+    return AODF_d
+
+    # return np.empty((1,1,1,odf.get_num_coeff(bands)))
+
+
+
+    def get_Y_Odfs(bands:int=10):
+    Direction_zero = np.zeros((100,100,100))
+    Inclination_zero = np.copy(Direction_zero)
+    mask = np.ones((100,100,100))
+    for i in range(Direction_zero.shape[0]):
+        for j in range(Direction_zero.shape[1]):
+            for k in range(Direction_zero.shape[2]):
+                if j <= 25 and i <= 27 and i >= 23 and k <= 50:
+                    Direction_zero[i,j,k] = np.pi*(1/2)
+                elif i <= 50 and j <= 50 and k <= 50 and j <= -i+52 and j >= -i+48 and j > 25:
+                    Direction_zero[i,j,k] = np.pi*(1-1/4)
+                elif i <= 50 and j <= 50 and k <= 50 and j <= i+2 and j >= i-2 and j > 25:
+                    Direction_zero[i,j,k] = np.pi*(1+1/4)
+                else:
+                    mask[i,j,k] = 0
+    _ODFs = odf3.compute(Direction_zero[:,:,:,None], Inclination_zero[:,:,:,None], mask[:,:,:,None], bands)
+    return _ODFs

@@ -17,12 +17,12 @@ import _sh
 
 @numba.njit(cache=True)
 def get_num_coeff(bands: int) -> int:
-    return ((bands) + 1) * (2 * (bands) + 1)
+    return int((bands+1)**2)
 
 
 @numba.njit(cache=True)
 def _get_bands_from_coeff(coeff: int) -> int:
-    r = 1 / 4 * (np.sqrt(8 * coeff + 1) - 3)
+    r =(np.sqrt(coeff) - 1)
     return int(r)
 
 
@@ -353,13 +353,6 @@ def visualize_odf(coefficients, n_phi, n_theta, scale=1, fig=None, ax=None):
 
     return fig, ax
 
-
-
-
-
-@numba.njit(cache=True)
-def get_num_coeff(bands: int) -> int:
-    return ((bands) + 1) * (2 * (bands) + 1)
 
 
 @numba.njit(cache=True)
