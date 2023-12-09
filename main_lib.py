@@ -290,7 +290,7 @@ def get_Y_Odfs_old(bands:int=10):
     return _ODFs
 
 
-def Get_AODF(ODFs:np.ndarray, dict_res:dict, dict_basis:dict, factor:int, x_koord:int, y_koord:int, z_koord:int, bands:int=10, number_of_winkel:int = 1000, factor_amp:int = 1000):
+def Get_AODF(ODFs:np.ndarray, dict_res:dict, dict_basis:dict, factor:int, x_koord:int, y_koord:int, z_koord:int, bands:int=10, number_of_winkel:int = 1000, factor_amp:int = 1000, sigma:float=2):
     # Winkel generieren
     rng = np.random.default_rng(random.randint(100000,10000000000))
     beta = np.arccos(1-2*(rng.random(number_of_winkel).reshape(number_of_winkel,1)))
@@ -299,7 +299,7 @@ def Get_AODF(ODFs:np.ndarray, dict_res:dict, dict_basis:dict, factor:int, x_koor
     # Punkte im Kegel mit Basisvektoren und Winkeln generieren
     result, basis, phi, theta = kegel_from_dict_withBasis(dict_res, dict_basis, factor, x_koord, y_koord, z_koord, alpha, beta, True)
     result_rot = reverse_rotate_and_translate_data(result, x_koord, y_koord, z_koord, alpha, beta)
-    weights = gauss_2d(result_rot[:,1,:], result_rot[:,2,:], y_koord, z_koord, sigma = 2)
+    weights = gauss_2d(result_rot[:,1,:], result_rot[:,2,:], y_koord, z_koord, sigma)
 
     # Mit weights alle punkte im Kegel ablaufen
     AODF_Amplitude = get_amplitude(result, ODFs, basis, weights)
@@ -341,7 +341,7 @@ def Get_AODF(ODFs:np.ndarray, dict_res:dict, dict_basis:dict, factor:int, x_koor
 
 
 
-    def get_Y_Odfs(bands:int=10):
+def get_Y_Odfs(bands:int=10):
     Direction_zero = np.zeros((100,100,100))
     Inclination_zero = np.copy(Direction_zero)
     mask = np.ones((100,100,100))
@@ -356,5 +356,24 @@ def Get_AODF(ODFs:np.ndarray, dict_res:dict, dict_basis:dict, factor:int, x_koor
                     Direction_zero[i,j,k] = np.pi*(1+1/4)
                 else:
                     mask[i,j,k] = 0
+    _ODFs = odf3.compute(Direction_zero[:,:,:,None], Inclination_zero[:,:,:,None], mask[:,:,:,None], bands)
+    return _ODFs
+
+
+def get_Y_Odfs_noise(bands:int=10):
+    Direction_zero = direction = np.random.uniform(0, 1, (40,40,40))*np.pi
+    Inclination_zero = np.zeros((40,40,40))
+    mask = np.ones((40,40,40))
+    for i in range(Direction_zero.shape[0]):
+        for j in range(Direction_zero.shape[1]):
+            for k in range(Direction_zero.shape[2]):
+                if j <= 25 and i <= 27 and i >= 23 and k <= 50:
+                    Direction_zero[i,j,k] = np.pi*(1/2)
+                elif i <= 50 and j <= 50 and k <= 50 and j <= -i+52 and j >= -i+48 and j > 25:
+                    Direction_zero[i,j,k] = np.pi*(1-1/4)
+                elif i <= 50 and j <= 50 and k <= 50 and j <= i+2 and j >= i-2 and j > 25:
+                    Direction_zero[i,j,k] = np.pi*(1+1/4)
+                # else:
+                #     mask[i,j,k] = 0
     _ODFs = odf3.compute(Direction_zero[:,:,:,None], Inclination_zero[:,:,:,None], mask[:,:,:,None], bands)
     return _ODFs

@@ -10,8 +10,8 @@ import vispy_odf
 #     print(h5f["Image"].shape)
 #     odf_coeff = h5f["Image"][:, :, 0, :].squeeze()
 
-
-odf_coeff = np.load("AODF_npsave_121.npy") # Crossing_npsave
+name = str(input("Name der Datei: X_npsave_121.npy\n"))
+odf_coeff = np.load(f"{name}_npsave_121.npy") # Crossing_npsave
 # odf_coeff = np.load("ODF_npsave.npy")
 print(odf_coeff.shape)
 odf_coeff = odf_coeff[:, :, 0, :].squeeze()
