@@ -348,23 +348,23 @@ def Get_AODF(ODFs:np.ndarray, dict_res:dict, dict_basis:dict, factor:int, x_koor
     # plt.show()
 
 
-    num_greater = np.sum(np.rint(AODF_Amplitude[AODF_Amplitude > 0]*100))
+    # num_greater = np.sum(np.rint(AODF_Amplitude[AODF_Amplitude > 0]*100))
     
-    num_greater = int(np.sum(np.rint(AODF_Amplitude[AODF_Amplitude > 0]*factor_amp)))
+    # num_greater = int(np.sum(np.rint(AODF_Amplitude[AODF_Amplitude > 0]*factor_amp)))
 
-    multiple_dir = np.empty((num_greater,1))*np.nan
-    multiple_inc = np.empty((num_greater,1))*np.nan
+    # multiple_dir = np.empty((num_greater,1))*np.nan
+    # multiple_inc = np.empty((num_greater,1))*np.nan
 
-    count = 0
-    for _i,_j in enumerate(AODF_Amplitude):
-        for k in range(int(_j*factor_amp if _j > 0 else 0)):
-            multiple_dir[count,:] = phi[int(_i)]
-            multiple_inc[count,:] = np.pi/2 - theta[int(_i)] 
-            count += 1
+    # count = 0
+    # for _i,_j in enumerate(AODF_Amplitude):
+    #     for k in range(int(_j*factor_amp if _j > 0 else 0)):
+    #         multiple_dir[count,:] = phi[int(_i)]
+    #         multiple_inc[count,:] = np.pi/2 - theta[int(_i)] 
+    #         count += 1
     
-    # greater_one = np.where(AODF_Amplitude*factor_amp > 1)[0]
-    # multiple_dir = np.repeat(phi[greater_one], np.round(AODF_Amplitude[greater_one] * factor_amp).astype(int))
-    # multiple_inc = np.pi/2 - np.repeat(theta[greater_one], np.round(AODF_Amplitude[greater_one] * factor_amp).astype(int))
+    greater_one = np.where(AODF_Amplitude*factor_amp > 1)[0]
+    multiple_dir = np.repeat(phi[greater_one], np.round(AODF_Amplitude[greater_one] * factor_amp).astype(int))
+    multiple_inc = np.pi/2 - np.repeat(theta[greater_one], np.round(AODF_Amplitude[greater_one] * factor_amp).astype(int))
  
     nan_mask = ~np.isnan(multiple_inc)
     Test_mask = multiple_inc == 0
@@ -413,3 +413,31 @@ def get_Y_Odfs_noise(bands:int=10):
                 #     mask[i,j,k] = 0
     _ODFs = odf3.compute(Direction_zero[:,:,:,None], Inclination_zero[:,:,:,None], mask[:,:,:,None], bands)
     return _ODFs
+
+
+
+def load_data(start, end):
+    for i in range(end-start):
+        if i == 0:
+            f_mask = h5py.File(f'MSA_hdf5\MSA0309_M8_70mu_70ms_s0{start+i}_a00_d000_Mask.h5', 'r')
+            f_Direction = h5py.File(f'MSA_hdf5\MSA0309_M8_70mu_70ms_s0{start+i}_ROFL_Direction.h5', 'r')
+            f_Inclination = h5py.File(f'MSA_hdf5\MSA0309_M8_70mu_70ms_s0{start+i}_ROFL_Inclination.h5', 'r')
+            f_rel = h5py.File(f'MSA_hdf5\MSA0309_M8_70mu_70ms_s0{start+i}_ROFL_T_rel.h5', 'r')
+            f_mask_image = np.array(f_mask["Image"])[:,:,None]
+            f_Direction_image = np.array(f_Direction["Image"])[:,:,None]
+            f_Inclination_image = np.array(f_Inclination["Image"])[:,:,None]
+            f_rel_image = np.array(f_rel["Image"])[:,:,None]
+        else:
+            f_mask1 = h5py.File(f'MSA_hdf5\MSA0309_M8_70mu_70ms_s0{start+i}_a00_d000_Mask.h5', 'r')
+            f_Direction1 = h5py.File(f'MSA_hdf5\MSA0309_M8_70mu_70ms_s0{start+i}_ROFL_Direction.h5', 'r')
+            f_Inclination1 = h5py.File(f'MSA_hdf5\MSA0309_M8_70mu_70ms_s0{start+i}_ROFL_Inclination.h5', 'r')
+            f_rel1 = h5py.File(f'MSA_hdf5\MSA0309_M8_70mu_70ms_s0{start+i}_ROFL_T_rel.h5', 'r')
+            f_mask_image1 = np.array(f_mask1["Image"])[:,:,None]
+            f_Direction_image1 = np.array(f_Direction1["Image"])[:,:,None]
+            f_Inclination_image1 = np.array(f_Inclination1["Image"])[:,:,None]
+            f_rel_image1 = np.array(f_rel1["Image"])[:,:,None]
+            f_mask_image = np.concatenate((f_mask_image, f_mask_image1), axis=2)
+            f_Direction_image = np.concatenate((f_Direction_image, f_Direction_image1), axis=2)
+            f_Inclination_image = np.concatenate((f_Inclination_image, f_Inclination_image1), axis=2)
+            f_rel_image = np.concatenate((f_rel_image, f_rel_image1), axis=2)
+    return (f_Direction_image, f_Inclination_image, f_mask_image, f_rel_image)
