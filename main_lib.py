@@ -10,7 +10,7 @@ import pickle
 import odf3
 import odf
 import h5py
-
+ 
 
 def load_dict(range_r = 6, factor = 10):
     with open(f'cache_dict_range_{range_r}_factor_{factor}.pkl', 'rb') as f:
@@ -233,6 +233,31 @@ def kegel_from_dict_withBasis(dict_cache:dict, dict_cache_basis:dict, factor:int
     return result, res_basis
 
 
+
+# def get_amplitude(result:np.ndarray, ODFs:np.ndarray, basis:np.ndarray, weights:np.ndarray)->np.ndarray:
+#     AODF_Amplitude = np.empty((result.shape[0]))
+#     for i, res in enumerate(result):
+#         # mask für nan werte
+#         nan_mask = ~np.isnan(res)
+#         mask = np.array(res[nan_mask], int)
+#         # shape anpassen
+#         mask_3d = np.reshape(mask, (3, int(mask.shape[0]/3)))
+#         # # Koordinaten außerhalb der range von ODF filtern
+#         # mask_odf = ~((mask_3d[0]>=ODFs.shape[0]) | (mask_3d[0]<0) | (mask_3d[1]>=ODFs.shape[1]) | (mask_3d[1]<0) | (mask_3d[2]>=ODFs.shape[2]) | (mask_3d[2]<0))
+
+#         # mask_3d = mask_3d[:,mask_odf]
+#         # nur weights auswählen die nicht nan inhalte haben
+#         if mask_3d.shape[-1] > 0:
+#             weight = weights[i, nan_mask[0]]
+#             # weight = weight[mask_odf]
+#             Test_ODF_masked = np.dot(weight[None,:], ODFs[mask_3d[0],mask_3d[1],mask_3d[2]])
+#             sum = np.dot(basis[None,i], Test_ODF_masked.T)
+#             AODF_Amplitude[i] = sum.item()/res[0,~np.isnan(res[0])].shape[0]
+#         else:
+#             AODF_Amplitude[i] = 0
+#     return AODF_Amplitude
+
+
 def get_amplitude(result:np.ndarray, ODFs:np.ndarray, basis:np.ndarray, weights:np.ndarray)->np.ndarray:
     AODF_Amplitude = np.empty((result.shape[0]))
     for i, res in enumerate(result):
@@ -241,11 +266,19 @@ def get_amplitude(result:np.ndarray, ODFs:np.ndarray, basis:np.ndarray, weights:
         mask = np.array(res[nan_mask], int)
         # shape anpassen
         mask_3d = np.reshape(mask, (3, int(mask.shape[0]/3)))
+        # Koordinaten außerhalb der range von ODF filtern
+        mask_odf = ~((mask_3d[0]>=ODFs.shape[0]) | (mask_3d[0]<0) | (mask_3d[1]>=ODFs.shape[1]) | (mask_3d[1]<0) | (mask_3d[2]>=ODFs.shape[2]) | (mask_3d[2]<0))
+
+        mask_3d = mask_3d[:,mask_odf]
         # nur weights auswählen die nicht nan inhalte haben
-        weight = weights[i, nan_mask[0]]
-        Test_ODF_masked = np.dot(weight[None,:], ODFs[mask_3d[0],mask_3d[1],mask_3d[2]-5])
-        sum = np.dot(basis[None,i], Test_ODF_masked.T)
-        AODF_Amplitude[i] = sum.item()/res[0,~np.isnan(res[0])].shape[0]
+        if mask_3d.shape[-1] > 0:
+            weight = weights[i, nan_mask[0]]
+            # weight = weight[mask_odf]
+            Test_ODF_masked = np.dot(weight[None,mask_odf], ODFs[mask_3d[0],mask_3d[1],mask_3d[2]])
+            sum = np.dot(basis[None,i], Test_ODF_masked.T)
+            AODF_Amplitude[i] = sum.item()/res[0,~np.isnan(res[0])].shape[0]
+        else:
+            AODF_Amplitude[i] = int(0)
     return AODF_Amplitude
 
 
@@ -315,20 +348,23 @@ def Get_AODF(ODFs:np.ndarray, dict_res:dict, dict_basis:dict, factor:int, x_koor
     # plt.show()
 
 
-    # num_greater = np.sum(np.rint(AODF_Amplitude[AODF_Amplitude > 0]*100))
+    num_greater = np.sum(np.rint(AODF_Amplitude[AODF_Amplitude > 0]*100))
     
-    # num_greater = int(np.sum(np.rint(AODF_Amplitude[AODF_Amplitude > 0]*factor_amp)))
+    num_greater = int(np.sum(np.rint(AODF_Amplitude[AODF_Amplitude > 0]*factor_amp)))
 
-    greater_one = np.where(AODF_Amplitude*factor_amp > 1)[0]
-    multiple_dir = np.repeat(phi[greater_one], np.round(AODF_Amplitude[greater_one] * factor_amp).astype(int))
-    multiple_inc = np.pi/2 - np.repeat(theta[greater_one], np.round(AODF_Amplitude[greater_one] * factor_amp).astype(int))
+    multiple_dir = np.empty((num_greater,1))*np.nan
+    multiple_inc = np.empty((num_greater,1))*np.nan
 
-    # count = 0
-    # for _i,_j in enumerate(AODF_Amplitude):
-    #     for k in range(int(_j*factor_amp if _j > 0 else 0)):
-    #         multiple_dir[count,:] = phi[int(_i)]
-    #         multiple_inc[count,:] = np.pi/2 - theta[int(_i)] 
-    #         count += 1
+    count = 0
+    for _i,_j in enumerate(AODF_Amplitude):
+        for k in range(int(_j*factor_amp if _j > 0 else 0)):
+            multiple_dir[count,:] = phi[int(_i)]
+            multiple_inc[count,:] = np.pi/2 - theta[int(_i)] 
+            count += 1
+    
+    # greater_one = np.where(AODF_Amplitude*factor_amp > 1)[0]
+    # multiple_dir = np.repeat(phi[greater_one], np.round(AODF_Amplitude[greater_one] * factor_amp).astype(int))
+    # multiple_inc = np.pi/2 - np.repeat(theta[greater_one], np.round(AODF_Amplitude[greater_one] * factor_amp).astype(int))
  
     nan_mask = ~np.isnan(multiple_inc)
     Test_mask = multiple_inc == 0
