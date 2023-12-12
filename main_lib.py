@@ -258,6 +258,31 @@ def kegel_from_dict_withBasis(dict_cache:dict, dict_cache_basis:dict, factor:int
 #     return AODF_Amplitude
 
 
+# def get_amplitude(result:np.ndarray, ODFs:np.ndarray, basis:np.ndarray, weights:np.ndarray)->np.ndarray:
+#     AODF_Amplitude = np.empty((result.shape[0]))
+#     for i, res in enumerate(result):
+#         # mask für nan werte
+#         nan_mask = ~np.isnan(res)
+#         mask = np.array(res[nan_mask], int)
+#         # shape anpassen
+#         mask_3d = np.reshape(mask, (3, int(mask.shape[0]/3)))
+#         # Koordinaten außerhalb der range von ODF filtern
+#         # print(mask_3d.shape)
+#         mask_odf = ~((mask_3d[0]>=ODFs.shape[0]) | (mask_3d[0]<0) | (mask_3d[1]>=ODFs.shape[1]) | (mask_3d[1]<0) | (mask_3d[2]>=ODFs.shape[2]) | (mask_3d[2]<0))
+#         # mask_odf = ((mask_3d[0]<ODFs.shape[0]) & (mask_3d[0]>0) & (mask_3d[1]<ODFs.shape[1]) & (mask_3d[1]>0) & (mask_3d[2]<ODFs.shape[2]) & (mask_3d[2]>0))
+#         mask_3d = mask_3d[:,mask_odf]
+#         # nur weights auswählen die nicht nan inhalte haben
+#         if mask_3d.shape[-1] > 0:
+#             weight = weights[i, nan_mask[0]]
+#             # weight = weight[mask_odf]
+#             Test_ODF_masked = np.dot(weight[None,mask_odf], ODFs[mask_3d[0],mask_3d[1],mask_3d[2]])
+#             sum = np.dot(basis[None,i], Test_ODF_masked.T)
+#             AODF_Amplitude[i] = sum.item()/mask_3d.shape[-1]
+#         else:
+#             AODF_Amplitude[i] = int(0)
+#     return AODF_Amplitude
+
+
 def get_amplitude(result:np.ndarray, ODFs:np.ndarray, basis:np.ndarray, weights:np.ndarray)->np.ndarray:
     AODF_Amplitude = np.empty((result.shape[0]))
     for i, res in enumerate(result):
@@ -267,16 +292,17 @@ def get_amplitude(result:np.ndarray, ODFs:np.ndarray, basis:np.ndarray, weights:
         # shape anpassen
         mask_3d = np.reshape(mask, (3, int(mask.shape[0]/3)))
         # Koordinaten außerhalb der range von ODF filtern
-        mask_odf = ~((mask_3d[0]>=ODFs.shape[0]) | (mask_3d[0]<0) | (mask_3d[1]>=ODFs.shape[1]) | (mask_3d[1]<0) | (mask_3d[2]>=ODFs.shape[2]) | (mask_3d[2]<0))
-
-        mask_3d = mask_3d[:,mask_odf]
+        # print(mask_3d.shape)
+        # mask_odf = ~((mask_3d[0]>=ODFs.shape[0]) | (mask_3d[0]<0) | (mask_3d[1]>=ODFs.shape[1]) | (mask_3d[1]<0) | (mask_3d[2]>=ODFs.shape[2]) | (mask_3d[2]<0))
+        # # mask_odf = ((mask_3d[0]<ODFs.shape[0]) & (mask_3d[0]>0) & (mask_3d[1]<ODFs.shape[1]) & (mask_3d[1]>0) & (mask_3d[2]<ODFs.shape[2]) & (mask_3d[2]>0))
+        # mask_3d = mask_3d[:,mask_odf]
         # nur weights auswählen die nicht nan inhalte haben
         if mask_3d.shape[-1] > 0:
             weight = weights[i, nan_mask[0]]
             # weight = weight[mask_odf]
-            Test_ODF_masked = np.dot(weight[None,mask_odf], ODFs[mask_3d[0],mask_3d[1],mask_3d[2]])
+            Test_ODF_masked = np.dot(weight[None,:], ODFs[mask_3d[0],mask_3d[1],mask_3d[2]])
             sum = np.dot(basis[None,i], Test_ODF_masked.T)
-            AODF_Amplitude[i] = sum.item()/res[0,~np.isnan(res[0])].shape[0]
+            AODF_Amplitude[i] = sum.item()/mask_3d.shape[-1]
         else:
             AODF_Amplitude[i] = int(0)
     return AODF_Amplitude
@@ -323,7 +349,7 @@ def get_Y_Odfs_old(bands:int=10):
     return _ODFs
 
 
-def Get_AODF(ODFs:np.ndarray, dict_res:dict, dict_basis:dict, factor:int, x_koord:int, y_koord:int, z_koord:int, bands:int=10, number_of_winkel:int = 1000, factor_amp:int = 1000, sigma:float=2):
+def Get_AODF(ODFs:np.ndarray, dict_res:dict, dict_basis:dict, factor:int, x_koord:int, y_koord:int, z_koord:int, number_of_winkel:int = 1000, factor_amp:int = 1000, sigma:float=2):
     # Winkel generieren
     rng = np.random.default_rng(random.randint(100000,10000000000))
     beta = np.arccos(1-2*(rng.random(number_of_winkel).reshape(number_of_winkel,1)))
@@ -362,10 +388,10 @@ def Get_AODF(ODFs:np.ndarray, dict_res:dict, dict_basis:dict, factor:int, x_koor
     #         multiple_inc[count,:] = np.pi/2 - theta[int(_i)] 
     #         count += 1
     
-    greater_one = np.where(AODF_Amplitude*factor_amp > 1)[0]
-    multiple_dir = np.repeat(phi[greater_one], np.round(AODF_Amplitude[greater_one] * factor_amp).astype(int))
-    multiple_inc = np.pi/2 - np.repeat(theta[greater_one], np.round(AODF_Amplitude[greater_one] * factor_amp).astype(int))
- 
+    greater_one = np.where((AODF_Amplitude*factor_amp) > 1)[0]
+    multiple_dir = np.repeat(phi[greater_one], np.round((AODF_Amplitude[greater_one]) * factor_amp).astype(int))
+    multiple_inc = np.pi/2 - np.repeat(theta[greater_one], np.round((AODF_Amplitude[greater_one]) * factor_amp).astype(int))
+    bands = odf3._get_bands_from_coeff(ODFs.shape[-1])
     nan_mask = ~np.isnan(multiple_inc)
     Test_mask = multiple_inc == 0
     if str(Test_mask[nan_mask].shape) == "(0,)":
@@ -441,3 +467,100 @@ def load_data(start, end):
             f_Inclination_image = np.concatenate((f_Inclination_image, f_Inclination_image1), axis=2)
             f_rel_image = np.concatenate((f_rel_image, f_rel_image1), axis=2)
     return (f_Direction_image, f_Inclination_image, f_mask_image, f_rel_image)
+
+
+
+def get_points_noRand(range_r,buffer = 1):
+    # Punkte vordefinieren
+    x = np.arange(-range_r, range_r+1, 1)
+    y = np.copy(x)
+    z = np.copy(x)
+    # erstelle das Gitter für x, y und z
+    x_grid, y_grid, z_grid = np.meshgrid(x, y, z)
+    # Punkte außerhalb des Kegels filtern 
+    mask = (x_grid**2 + y_grid**2 + z_grid**2 <= (range_r+buffer)**2) & (x_grid**2 + y_grid**2 + z_grid**2 >= (range_r-buffer)**2)
+    x_mask = x_grid[mask]
+    y_mask = y_grid[mask]
+    z_mask = z_grid[mask]
+    # x, y, z zusammenfassen
+    Kugelschale = np.concatenate((x_mask[:,None], y_mask[:,None], z_mask[:,None]), axis=1)
+    # Kugelkoordinaten Winkel bestimmen
+    beta = np.arccos(Kugelschale[:,0]/range_r)
+    if np.sum(np.isnan(beta)) > 0:
+        print(f"Warning, {np.sum(np.isnan(beta))} nan entries in beta!!!")
+    alpha = np.arctan2(Kugelschale[:,2],Kugelschale[:,1])+math.pi/2
+    if np.sum(np.isnan(alpha)) > 0:
+        print(f"Warning, {np.sum(np.isnan(alpha))} nan entries in alpha!!!")
+    return(Kugelschale, alpha, beta)
+
+def generate_dict_basis_new_noRand(range_r:int = 10, factor:int = 10, band: int = 10, buffer: int = 0.8):
+    Kugelschale, alpha, beta = get_points_noRand(factor, buffer)
+    temp_dict = {tuple(a_row): b_row for a_row, b_row in zip(Kugelschale, koords_in_kegel_cache(range_r, alpha, beta))}
+    temp_dict_basis = {tuple(a_row): b_row for a_row, b_row in zip(Kugelschale, get_basis_xyz_new(*Kugelschale.T, band, factor))}
+    return temp_dict, temp_dict_basis, alpha, beta
+
+def Get_AODF_noRand(ODFs:np.ndarray, dict_res:dict, dict_basis:dict, factor:int, x_koord:int, y_koord:int, z_koord:int, alpha:np.ndarray, beta:np.ndarray, factor_amp:int = 1000, sigma:float=2):
+    # # Winkel generieren
+    # rng = np.random.default_rng(random.randint(100000,10000000000))
+    # beta = np.arccos(1-2*(rng.random(number_of_winkel).reshape(number_of_winkel,1)))
+    # alpha = rng.random(number_of_winkel).reshape(number_of_winkel,1)*math.pi*2
+
+    # Punkte im Kegel mit Basisvektoren und Winkeln generieren
+    result, basis, phi, theta = kegel_from_dict_withBasis(dict_res, dict_basis, factor, x_koord, y_koord, z_koord, alpha, beta, True)
+    result_rot = reverse_rotate_and_translate_data(result, x_koord, y_koord, z_koord, alpha, beta)
+    weights = gauss_2d(result_rot[:,1,:], result_rot[:,2,:], y_koord, z_koord, sigma)
+
+    # Mit weights alle punkte im Kegel ablaufen
+    AODF_Amplitude = get_amplitude(result, ODFs, basis, weights)
+    
+    greater_one = np.where((AODF_Amplitude*factor_amp) > 1)[0]
+    multiple_dir = np.repeat(phi[greater_one], np.round((AODF_Amplitude[greater_one]) * factor_amp).astype(int))
+    multiple_inc = np.pi/2 - np.repeat(theta[greater_one], np.round((AODF_Amplitude[greater_one]) * factor_amp).astype(int))
+    bands = 10
+    # odf3._get_bands_from_coeff(ODFs.shape[-1])
+    nan_mask = ~np.isnan(multiple_inc)
+    Test_mask = multiple_inc == 0
+    if str(Test_mask[nan_mask].shape) == "(0,)":
+        return np.empty((1,1,1,odf.get_num_coeff(bands)))
+    AODF_d = odf.compute(np.ravel(multiple_dir[nan_mask])[None,None,None,:],np.ravel(multiple_inc[nan_mask])[None,None,None,:], np.ones(np.ravel(multiple_inc[nan_mask])[None,None,None,:].shape), bands)
+    return AODF_d
+
+
+
+def genereate_divergence():
+    field_phi = np.empty((60,60,60))
+    field_theta = np.copy(field_phi)
+    for i in range(field_phi.shape[0]):
+        for j in range(field_phi.shape[1]):
+            for k in range(field_phi.shape[2]):
+                field_phi[i,j,k] = 0 # np.arccos(k+20/np.linalg.norm([i+20,j+20,k+20])) # np.arccos(k+20/np.linalg.norm([i+20,j+20,k+20]))
+                field_theta[i,j,k] = np.arctan2(j+10,i+10)
+    return(field_theta, field_phi)
+
+def genereate_swirls():
+    field_phi = np.empty((60,60,60))
+    field_theta = np.copy(field_phi)
+    for i in range(field_phi.shape[0]):
+        for j in range(field_phi.shape[1]):
+            for k in range(field_phi.shape[2]):
+                field_phi[i,j,k] = 0 # np.arccos(k+20/np.linalg.norm([i+20,j+20,k+20])) # np.arccos(k+20/np.linalg.norm([i+20,j+20,k+20]))
+                field_theta[i,j,k] = np.pi * (i+j)*0.02
+    return(field_theta, field_phi)
+
+def get_Y_Odfs_noise(bands:int=10):
+    Direction_zero = direction = np.random.uniform(0, 1, (40,40,40))*np.pi
+    Inclination_zero = np.zeros((40,40,40))
+    mask = np.ones((40,40,40))
+    for i in range(Direction_zero.shape[0]):
+        for j in range(Direction_zero.shape[1]):
+            for k in range(Direction_zero.shape[2]):
+                if j <= 25 and i <= 27 and i >= 23 and k <= 50:
+                    Direction_zero[i,j,k] = np.pi*(1/2)
+                elif i <= 50 and j <= 50 and k <= 50 and j <= -i+52 and j >= -i+48 and j > 25:
+                    Direction_zero[i,j,k] = np.pi*(1-1/4)
+                elif i <= 50 and j <= 50 and k <= 50 and j <= i+2 and j >= i-2 and j > 25:
+                    Direction_zero[i,j,k] = np.pi*(1+1/4)
+                # else:
+                #     mask[i,j,k] = 0
+    _ODFs = odf3.compute(Direction_zero[:,:,:,None], Inclination_zero[:,:,:,None], mask[:,:,:,None], bands)
+    return _ODFs    
