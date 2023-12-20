@@ -1,6 +1,7 @@
 import numpy as np
 import math
 import matplotlib.pyplot as plt
+import matplotlib
 from colour import Color
 from collections import Counter
 import random
@@ -11,7 +12,23 @@ import odf3
 import odf
 import h5py
 from tqdm import tqdm
+import h5py
+import vispy_odf
  
+def alpha_to_phi(alpha:np.ndarray, beta:np.ndarray):
+    x = (np.cos(beta))
+    y = (np.sin(alpha)*np.sin(beta))
+    z = (-np.cos(alpha)*np.sin(beta))
+    return np.arctan2(y,x), np.arccos(z)
+
+def phi_to_alpha(phi:np.ndarray, theta:np.ndarray):
+    x = np.cos(phi) * np.sin(theta)
+    y = np.sin(phi) * np.sin(theta)
+    z = np.cos(theta)
+
+    beta = np.arccos(x)
+    alpha = np.arctan2(z,y)+math.pi/2
+    return alpha, beta
 
 def koords_in_kegel(range_r = 4, alpha = np.array([]), beta = np.array([])):
     # Winkel umdrehen, da Koordinatensystem gedreht wird anstatt der Punkte
@@ -28,7 +45,7 @@ def koords_in_kegel(range_r = 4, alpha = np.array([]), beta = np.array([])):
     x = np.linspace(-range_r*2, range_r*2, range_r*4+1)
     y = np.copy(x)
     z = np.copy(x)
-    length = int((2*range_r)**3)
+    length = int(((2*range_r)**3)/6)+1# int((2*range_r)**3)
     print(cos_alpha.shape)
     # Erstelle das Gitter für x, y und z
     x_grid, y_grid, z_grid = np.meshgrid(x, y, z)
@@ -54,6 +71,52 @@ def koords_in_kegel(range_r = 4, alpha = np.array([]), beta = np.array([])):
         data = np.array([x_mask, y_mask, z_mask])
         result[i,:,:np.shape(data)[1]] = data
     return result
+
+
+
+
+def koords_in_kegel_MathKegel(range_r = 4, alpha = np.array([]), beta = np.array([])):
+    # Winkel umdrehen, da Koordinatensystem gedreht wird anstatt der Punkte
+    cos_alpha = np.cos(-alpha)
+    sin_alpha = np.sin(-alpha)
+    cos_beta = np.cos(-beta)
+    sin_beta = np.sin(-beta)
+    cos_alpha_cos_beta = cos_alpha*cos_beta
+    sin_alpha_cos_beta = sin_alpha*cos_beta
+    cos_alpha_sin_beta = cos_alpha*sin_beta
+    sin_alpha_sin_beta = sin_alpha*sin_beta
+    
+    # erstelle das Gitter für x, y und z
+    x = np.linspace(-range_r*2, range_r*2, range_r*4+1)
+    y = np.copy(x)
+    z = np.copy(x)
+    length = int(((2*range_r)**3)/6)+1# int((2*range_r)**3)
+    print(cos_alpha.shape)
+    # Erstelle das Gitter für x, y und z
+    x_grid, y_grid, z_grid = np.meshgrid(x, y, z)
+    # test_x = np.copy(x_grid)
+    result = np.empty(((cos_alpha.shape[0]), 3, length)) * np.nan
+
+    for i, ca, sa, cb, sb, cacb, sacb, casb, sasb in tqdm(zip(range((cos_alpha.shape[0])), cos_alpha, sin_alpha, cos_beta, sin_beta, cos_alpha_cos_beta, sin_alpha_cos_beta, cos_alpha_sin_beta, sin_alpha_sin_beta)):
+        # erst x achse dann y achse
+        # Sphere_mask: 
+        # mask = ((ca*y_grid-sa*z_grid)**2 + (cacb*z_grid-sb*x_grid+sacb*y_grid)**2 + (casb*z_grid+sasb*y_grid+cb*x_grid)**2) < range_r**2 
+        mask = (
+                ((ca*y_grid-sa*z_grid)**2 + (cacb*z_grid-sb*x_grid+sacb*y_grid)**2 < (casb*z_grid+sasb*y_grid+cb*x_grid)**2) & 
+                (0 < (casb*z_grid+sasb*y_grid+cb*x_grid)) & 
+                (range_r > (casb*z_grid+sasb*y_grid+cb*x_grid))
+                )
+        # x,y,z werte mit der spezifischen Maske auf die Kegel zuschneiden
+        x_mask = x_grid[mask]
+        y_mask = y_grid[mask]
+        z_mask = z_grid[mask]
+        x_mask = np.append(x_mask,[0])
+        y_mask = np.append(y_mask,[0])
+        z_mask = np.append(z_mask,[0])
+        data = np.array([x_mask, y_mask, z_mask])
+        result[i,:,:np.shape(data)[1]] = data
+    return result
+
 
 
 # anpassung der schnellen ungenauen berechnung der Kegel, da die Funktion zur bewertung der Punlte kontinuiertlich ist.
@@ -111,13 +174,23 @@ def gauss_1d(x,mu_x=0,sigma=2):
     return 1/(np.sqrt(math.pi*2)*sigma)*np.exp(-1/2*(((x-mu_x)/sigma)**2))
 
 
-def get_result_basis(range_r, bands, number_of_winkel):
-    alpha, beta = fibonacci_sphere(number_of_winkel)
+def get_result_basis(range_r, bands, alpha:np.ndarray, beta:np.ndarray):
     print(alpha.shape)
     result = koords_in_kegel(range_r, alpha, beta)
-    cosbeta = np.cos(beta)
-    sinbeta = np.sin(beta)
-    basis = get_basis(alpha, cosbeta, sinbeta, bands)
+    phi, theta = alpha_to_phi(alpha, beta)
+    costheta = np.cos(theta)
+    sintheta = np.sin(theta)
+    basis = get_basis(phi, costheta, sintheta, bands)
+
+    return (result, basis)
+
+def get_result_basis_MathKegel(range_r, bands, alpha:np.ndarray, beta:np.ndarray):
+    print(alpha.shape)
+    result = koords_in_kegel_MathKegel(range_r, alpha, beta)
+    phi, theta = alpha_to_phi(alpha, beta)
+    costheta = np.cos(theta)
+    sintheta = np.sin(theta)
+    basis = get_basis(phi, costheta, sintheta, bands)
 
     return (result, basis)
 
@@ -148,8 +221,7 @@ def kegel_from_dict_withBasis(dict_cache:dict, dict_cache_basis:dict, factor:int
     result[:,2,:] += z_koord
     if get_phi_theta == True:
         # Phi und Theta berechnen für ODFs
-        phi = np.arccos(z)
-        theta = np.arctan2(y,x)
+        phi, theta = alpha_to_phi(alpha, beta)
         return (result, res_basis, phi, theta)
 
     return result, res_basis
@@ -172,6 +244,25 @@ def get_amplitude(result: np.ndarray, ODFs: np.ndarray, basis: np.ndarray, weigh
         for i, res in enumerate(result)
     ])
 
+
+
+
+# def get_amplitude(result: np.ndarray, ODFs: np.ndarray, basis: np.ndarray, weights: np.ndarray) -> np.ndarray:
+#     return np.array([
+#         (
+#             np.dot(
+#                 basis[None, i],
+#                 np.dot(
+#                     weights[i, ~np.isnan(res)[0]][None, :],
+#                     ODFs[
+#                         tuple(np.reshape(np.array(res[~np.isnan(res)], int), (3, -1)))
+#                     ]
+#                 ).T
+#             ).item() / np.reshape(np.array(res[~np.isnan(res)], int), (3, -1)).shape[-1]
+#         ) if np.reshape(np.array(res[~np.isnan(res)], int), (3, -1)).shape[-1] > 0
+#         else 0
+#         for i, res in enumerate(result)
+#     ])
 
         # phi = np.arccos(z)
         # theta = np.arctan2(y,x)
@@ -449,10 +540,9 @@ def kegel_from_dict_withBasis_noTranslation(dict_cache:dict, dict_cache_basis:di
 
     return result, res_basis
 
-def reverse_rotate_and_translate_data_noTranslation(data, number_of_winkel:int=1500):
+def reverse_rotate_and_translate_data_noTranslation(data, alpha:np.ndarray, beta:np.ndarray):
     # Translation Rückgängig machen
     data_ = np.copy(data)
-    alpha, beta = fibonacci_sphere(number_of_winkel)
     # Für Optimierung Variablen vor definieren
     cos_alpha = np.cos(-alpha)
     sin_alpha = np.sin(-alpha)
@@ -574,6 +664,39 @@ def fibonacci_sphere_2(num_pts:int=1000):
     phi = np.pi * (1 + 5**0.5) * indices
     return (phi, theta)
 
+def sphere(number:int=1500):
+    phi, theta = fibonacci_sphere_2(number)
+
+    x = np.cos(phi) * np.sin(theta)
+    y = np.sin(phi) * np.sin(theta)
+    z = np.cos(theta)
+
+
+    # fig = plt.figure()
+    # ax = fig.add_subplot(projection = "3d")
+    # ax.scatter(x, y, z)
+    # plt.show()
+
+    points = np.array([x, y, z]).T
+
+
+    from scipy.spatial import Delaunay, Voronoi
+    tri = Delaunay(points)
+
+    # Berechne die äquidistanten Winkel in Kugelkoordinaten
+    phi = []
+    theta = []
+
+    for simplex in tri.simplices:
+        for i in range(3):
+            p = points[simplex[i]]
+            r, azimuth, inclination = np.linalg.norm(p), np.arctan2(p[1], p[0]), np.arccos(p[2] / np.linalg.norm(p))
+
+            # Füge die Winkel zu den Listen hinzu
+            phi.append(azimuth)
+            theta.append(inclination)
+    return (np.array(phi), np.array(theta))
+
 
 def get_winkel(num_pts:int=1000):
     phi, theta = fibonacci_sphere(int(num_pts/2))
@@ -613,9 +736,60 @@ def get_Duplicates_new(data=np.array([])):
 
 
 
+# def plot_data(data, sorted_data, x_limit, y_limit, z_limit, x_plot_limit = 5, y_plot_limit = 5, z_plot_limit = 5):
+#     fig = plt.figure(figsize=(8, 8))
+#     ax = fig.add_subplot(2,1,1,projection = "3d")
+
+#     red = Color("red")
+#     colors = list(red.range_to(Color("blue"), int(list(sorted_data[-1])[-1])+1))
+
+#     # for count, i in enumerate([*dict_duplicates.keys()]):
+#     #     if int(list(sorted_dict_duplicates[-1])[-1])*0.5 <= [*dict_duplicates.values()][count]:
+#     #         x_str, y_str, z_str_= (i.strip("()").split(","))
+#     #         x, y, z = float(x_str), float(y_str), float(z_str_.split(")")[0])
+#     #         ax.scatter(x,y,z, c = str(colors[[*dict_duplicates.values()][count]]))
+
+
+#     for count, i in enumerate([*data.keys()]):
+#         x_str, y_str, z_str_= (i.strip("()").split(","))
+#         x, y, z = float(x_str), float(y_str), float(z_str_.split(")")[0])
+#         if x <= x_limit and y <= y_limit and z <= z_limit:
+#             ax.scatter(x,y,z, c = str(colors[[*data.values()][count]]))
+#             # if x!=0 and y!=0 and z!=0:
+#             #     ax.scatter(x,y,z, c = str(colors[[*data.values()][count]]))
+
+#     #Plot Colormap
+#     x_color = range(int(list(sorted_data[-1])[-1])+1)
+#     dict_colors = dict(zip(x_color,colors))
+#     color_f = lambda n : dict_colors.get(n)
+#     # odf3._set_axes_equal(ax)
+#     ax1 = fig.add_subplot(2,1,2)
+#     # ax1.imshow(aspect='auto')
+#     for x_arg in x_color:
+#         ax1.axvline(x_arg, color=str(color_f(x_arg)))
+
+#     # pos = ax.get_position()
+#     # pos.y0 = 0.8  # Ändere den Startpunkt der Y-Position des Scatterplots
+#     # ax.set_position(pos)
+
+#     pos = ax1.get_position()
+#     pos.y0 = 0.2  # Ändere den Startpunkt der Y-Position des Scatterplots
+#     ax1.set_position(pos)
+#     # ax.set_xlim3d(-x_plot_limit, x_plot_limit)
+#     # ax.set_ylim3d(-y_plot_limit, y_plot_limit)
+#     # ax.set_zlim3d(-z_plot_limit, z_plot_limit)
+
+#     plt.tight_layout()    
+
+
 def plot_data(data, sorted_data, x_limit, y_limit, z_limit, x_plot_limit = 5, y_plot_limit = 5, z_plot_limit = 5):
-    fig = plt.figure()
-    ax = fig.add_subplot(projection = "3d")
+    # Erstelle die Figure und die Subplots mit GridSpec
+    fig = plt.figure(figsize=(8, 6))
+    gs = matplotlib.gridspec.GridSpec(2, 1, height_ratios=[8, 1])  # Verhältnis der Höhen der Subplots
+
+    # Erstelle den 3D Scatterplot als oberen Subplot
+    ax = plt.subplot(gs[0], projection='3d')
+
 
     red = Color("red")
     colors = list(red.range_to(Color("blue"), int(list(sorted_data[-1])[-1])+1))
@@ -634,20 +808,41 @@ def plot_data(data, sorted_data, x_limit, y_limit, z_limit, x_plot_limit = 5, y_
             ax.scatter(x,y,z, c = str(colors[[*data.values()][count]]))
             # if x!=0 and y!=0 and z!=0:
             #     ax.scatter(x,y,z, c = str(colors[[*data.values()][count]]))
-
+    # ax.set_xticks([])  # Entferne x-Achsenbeschriftungen
+    # ax.set_yticks([])  # Entferne y-Achsenbeschriftungen
+    # ax.set_zticks([])
+    plt.grid(True)
     #Plot Colormap
     x_color = range(int(list(sorted_data[-1])[-1])+1)
     dict_colors = dict(zip(x_color,colors))
     color_f = lambda n : dict_colors.get(n)
+    # odf3._set_axes_equal(ax)
 
-    fig1, ax1 = plt.subplots(figsize=(6, 1))
-
+    # Erstelle den Farbverlauf als unteren Subplot
+    ax1 = plt.subplot(gs[1])
+    # ax1.imshow(aspect='auto')
     for x_arg in x_color:
         ax1.axvline(x_arg, color=str(color_f(x_arg)))
+
+
+    # Entferne die Beschriftungen der x- und y-Achsen, behalte aber das Gitter
+    ax1.spines['top'].set_visible(False)
+    ax1.spines['right'].set_visible(False)
+    ax1.spines['bottom'].set_visible(False)
+    ax1.spines['left'].set_visible(False)
+    ax1.get_yaxis().set_ticks([])
+    ax.tick_params(axis='x', labelsize=0)
+    ax.tick_params(axis='y', labelsize=0)
+    ax.tick_params(axis='z', labelsize=0)
+    ax1.tick_params(axis='x', labelsize=22)
+    # pos = ax.get_position()
+    # pos.y0 = 0.8  # Ändere den Startpunkt der Y-Position des Scatterplots
+    # ax.set_position(pos)
+
 
     # ax.set_xlim3d(-x_plot_limit, x_plot_limit)
     # ax.set_ylim3d(-y_plot_limit, y_plot_limit)
     # ax.set_zlim3d(-z_plot_limit, z_plot_limit)
 
     plt.tight_layout()    
-    plt.show()
+
