@@ -66,8 +66,9 @@ for count in range(1):
         plt.imshow(image)
         # plt.ylim(325,440)
         # plt.xlim(325,445)
-        plt.tick_params(axis='x', labelsize=0)
-        plt.tick_params(axis='y', labelsize=0)
+        plt.xticks([])
+        plt.yticks([])
+        plt.subplots_adjust(top = 1, bottom = 0, right = 1, left = 0, hspace = 0, wspace = 0)
         plt.savefig(f"new_lib_MiniSwirl_{i+range_r}_AODF_b{bands}_s{int(sigma*10)}_c{coefficient}_famp{factor_amp}_n{number_of_winkel}_r{range_r}_Rand_{factor}_{count}_noInc.png", dpi=500)
         plt.clf()
 

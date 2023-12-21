@@ -51,8 +51,9 @@ for i in tqdm(range(ODFs.shape[2]),desc='Generiere Bilder', leave=False):
 
     image = vispy_odf.render_scene(odf_coeff*coefficient)
     plt.imshow(image)
-    plt.tick_params(axis='x', labelsize=0)
-    plt.tick_params(axis='y', labelsize=0)
+    plt.xticks([])
+    plt.yticks([])
+    plt.subplots_adjust(top = 1, bottom = 0, right = 1, left = 0, hspace = 0, wspace = 0)
     plt.savefig(f"new_lib_MiniSwirl{i}_ODF_b{bands}_s{int(sigma*10)}_c{coefficient}_famp{factor_amp}_n{number_of_winkel}_r{range_r}_fib_2_noInc.png", dpi=500)
     plt.clf()
 

@@ -575,7 +575,7 @@ def Prepare():
 
 
 
-def Get_AODF_noRand_noCache(ODFs:np.ndarray, result:np.ndarray, basis:np.ndarray, weights:np.ndarray, phi:np.ndarray, theta:np.ndarray,x_koord:int, y_koord:int, z_koord:int, factor_amp:int = 1000, sigma:float=2):
+def Get_AODF_noRand_noCache(ODFs:np.ndarray, result:np.ndarray, basis:np.ndarray, weights:np.ndarray, phi:np.ndarray, theta:np.ndarray,x_koord:int, y_koord:int, z_koord:int, factor_amp:int = 1000, sigma:float=2,bands:int = 10):
     # Mit weights alle punkte im Kegel ablaufen
     result_ = np.copy(result)
     result_[:,0,:] += x_koord
@@ -584,24 +584,23 @@ def Get_AODF_noRand_noCache(ODFs:np.ndarray, result:np.ndarray, basis:np.ndarray
     AODF_Amplitude = get_amplitude(result_, ODFs, basis, weights)
 
     # Scatterplot generieren
-    x = AODF_Amplitude[:,None] * np.cos(phi) * np.sin(theta)
-    y = AODF_Amplitude[:,None] * np.sin(phi) * np.sin(theta)
-    z = AODF_Amplitude[:,None] * np.cos(theta)
-    fig = plt.figure()
-    ax = fig.add_subplot(projection = "3d")
-    n = 10000
-    ax.scatter(x[:n],y[:n],z[:n])
-    plt.show()
+    # x = AODF_Amplitude[:,None] * np.cos(phi) * np.sin(theta)
+    # y = AODF_Amplitude[:,None] * np.sin(phi) * np.sin(theta)
+    # z = AODF_Amplitude[:,None] * np.cos(theta)
+    # fig = plt.figure()
+    # ax = fig.add_subplot(projection = "3d")
+    # n = 10000
+    # ax.scatter(x[:n],y[:n],z[:n])
+    # plt.show()
     
     greater_one = np.where((AODF_Amplitude*factor_amp) > 1)[0]
     multiple_dir = np.repeat(phi[greater_one], np.round((AODF_Amplitude[greater_one]) * factor_amp).astype(int))
     multiple_inc = np.pi/2 - np.repeat(theta[greater_one], np.round((AODF_Amplitude[greater_one]) * factor_amp).astype(int))
-    bands = 10
     # odf3._get_bands_from_coeff(ODFs.shape[-1])
     nan_mask = ~np.isnan(multiple_inc)
     Test_mask = multiple_inc == 0
     if str(Test_mask[nan_mask].shape) == "(0,)":
-        return np.empty((1,1,1,odf.get_num_coeff(bands)))
+        return np.empty((odf.get_num_coeff(bands),))
     AODF_d = odf.compute(np.ravel(multiple_dir[nan_mask]),np.ravel(multiple_inc[nan_mask]), np.ones(np.ravel(multiple_inc[nan_mask]).shape), bands)
     return AODF_d
 
@@ -632,7 +631,7 @@ def Get_AODF_noRand_noCache_amp(ODFs:np.ndarray, result:np.ndarray, basis:np.nda
     nan_mask = ~np.isnan(multiple_inc)
     Test_mask = multiple_inc == 0
     if str(Test_mask[nan_mask].shape) == "(0,)":
-        return np.empty((1,1,1,odf.get_num_coeff(bands)))
+        return np.empty((odf.get_num_coeff(bands),))
     AODF_d = odf.compute(np.ravel(multiple_dir[nan_mask]),np.ravel(multiple_inc[nan_mask]), np.ones(np.ravel(multiple_inc[nan_mask]).shape), bands)
     return (AODF_d, AODF_Amplitude)
 

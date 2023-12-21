@@ -34,7 +34,7 @@ bands = 10
 # Anzahl der Sampling Punkte
 number_of_winkel = 1500
 # Gaussfunktion Sigma
-sigma = 0.5
+sigma = 2
 # Faktor, welche Punkte in die AODFs eingehen
 factor_amp = 10
 # Faktor für die Größe der AODFs in der Visualisierung
@@ -78,5 +78,8 @@ for i in range(AODFs.shape[2]):
 
     image = vispy_odf.render_scene(odf_coeff*coefficient)
     plt.imshow(image)
+    plt.xticks([])
+    plt.yticks([])
+    plt.subplots_adjust(top = 1, bottom = 0, right = 1, left = 0, hspace = 0, wspace = 0)
     plt.savefig(f"new_lib_PLI_600-650_900-950_{300+i+range_r}_AODF_b{bands}_s{int(sigma*10)}_c{coefficient}_famp{factor_amp}_n{number_of_winkel}_r{range_r}_fib_2.png", dpi=500)
     plt.clf()

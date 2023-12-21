@@ -15,7 +15,7 @@ def genereate_divergence_(middle_x:int=3,middle_y:int=3,middle_z:int=3):
     for i in range(field_phi.shape[0]):
         for j in range(field_phi.shape[1]):
             for k in range(field_phi.shape[2]):
-                field_phi[i,j,k] = np.arccos((k-middle_z)/np.linalg.norm([i-middle_x,j-middle_y,k-middle_z])) # np.arccos(k+20/np.linalg.norm([i+20,j+20,k+20]))
+                field_phi[i,j,k] = 0#np.arccos((k-middle_z)/np.linalg.norm([i-middle_x,j-middle_y,k-middle_z])) # np.arccos(k+20/np.linalg.norm([i+20,j+20,k+20]))
                 field_theta[i,j,k] = np.arctan2(j-middle_y,i-middle_x)
     return(field_theta, field_phi)
 
@@ -51,8 +51,9 @@ for i in tqdm(range(ODFs.shape[2]),desc='Generiere Bilder', leave=False):
 
     image = vispy_odf.render_scene(odf_coeff*coefficient)
     plt.imshow(image)
-    plt.tick_params(axis='x', labelsize=0)
-    plt.tick_params(axis='y', labelsize=0)
+    plt.xticks([])
+    plt.yticks([])
+    plt.subplots_adjust(top = 1, bottom = 0, right = 1, left = 0, hspace = 0, wspace = 0)
     plt.savefig(f"new_lib_MonoStar{i}_ODF_b{bands}_s{int(sigma*10)}_c{coefficient}_famp{factor_amp}_n{number_of_winkel}_r{range_r}_fib_2.png", dpi=500)
     plt.clf()
 

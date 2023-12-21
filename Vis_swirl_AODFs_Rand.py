@@ -62,6 +62,9 @@ for i in tqdm(range(AODFs.shape[2]),desc='Generiere Bilder', leave=False):
 
     image = vispy_odf.render_scene(odf_coeff*coefficient)
     plt.imshow(image)
+    plt.xticks([])
+    plt.yticks([])
+    plt.subplots_adjust(top = 1, bottom = 0, right = 1, left = 0, hspace = 0, wspace = 0)
     plt.savefig(f"new_lib_Swirl_{i+range_r}_AODF_b{bands}_s{int(sigma*10)}_c{coefficient}_famp{factor_amp}_n{number_of_winkel}_r{range_r}_Rand_{factor}_2.png", dpi=500)
     plt.clf()
 

@@ -185,7 +185,7 @@ def render_scene(
     odf_coeffs,
     output=None,
     l_max = 12,
-    n_sphere=64,
+    n_sphere=128,
     size_per_odf=256,  # pixelsize
     scale=1,
     downscale=1,
