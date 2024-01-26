@@ -26,13 +26,13 @@ def genereate_divergence_(middle_x:int=7,middle_y:int=7,middle_z:int=7):
 # Kegel länge
 range_r = 3
 # Anzahl der Bänder der ODFs und AODFs
-bands = 8
+bands = 10
 # Anzahl der Sampling Punkte
 number_of_winkel = 1500
 # Gaussfunktion Sigma
 sigma = 0.3
 # Faktor, welche Punkte in die AODFs eingehen
-factor_amp = 100
+factor_amp = 18
 # Faktor für die Größe der AODFs in der Visualisierung
 coefficient = 0.2
 # ODFs Generieren

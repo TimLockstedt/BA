@@ -34,14 +34,14 @@ bands = 10
 # Anzahl der Sampling Punkte
 number_of_winkel = 1500
 # Gaussfunktion Sigma
-sigma = 0.5
+sigma = 2
 # Faktor, welche Punkte in die AODFs eingehen
 factor_amp = 10
 # Faktor für die Größe der AODFs in der Visualisierung
-coefficient = 0.5
+coefficient = 0.3
 # ODFs Generieren
 Direction_image, Inclination_image, mask_image, rel_image = load_data(300, 310)
-ODFs = odf3.compute(np.deg2rad(Direction_image)[:,:,:,None], np.deg2rad(Inclination_image)[:,:,:,None], mask_image[:,:,:,None], bands)[600:650,900:950,:,:]
+ODFs = odf3.compute(np.deg2rad(Direction_image)[:,:,:,None], np.deg2rad(Inclination_image)[:,:,:,None], mask_image[:,:,:,None], bands)[582:608,917:943]# [580:610,915:945,:,:]
 for i in tqdm(range(ODFs.shape[2])):
     odf_coeff = ODFs
     print(odf_coeff.shape)

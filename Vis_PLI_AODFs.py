@@ -28,20 +28,20 @@ def load_data(start, end):
 
 
 # Kegel länge
-range_r = 3
+range_r = 2
 # Anzahl der Bänder der ODFs und AODFs
 bands = 10
 # Anzahl der Sampling Punkte
 number_of_winkel = 1500
 # Gaussfunktion Sigma
-sigma = 2
+sigma = 0.5
 # Faktor, welche Punkte in die AODFs eingehen
 factor_amp = 10
 # Faktor für die Größe der AODFs in der Visualisierung
 coefficient = 0.5
 # ODFs Generieren
 Direction_image, Inclination_image, mask_image, rel_image = load_data(300, 310)
-ODFs = odf3.compute(np.deg2rad(Direction_image)[:,:,:,None], np.deg2rad(Inclination_image)[:,:,:,None], mask_image[:,:,:,None], bands)[600:650,900:950,:,:]
+ODFs = odf3.compute(np.deg2rad(Direction_image)[:,:,:,None], np.deg2rad(Inclination_image)[:,:,:,None], mask_image[:,:,:,None], bands)#[580:610,915:945,:,:]# [600:650,900:950,:,:]
 limit_x, limit_y, limit_z = ODFs.shape[0],ODFs.shape[1],ODFs.shape[2] #20,20,20# 
 print(ODFs.shape)
 # Kegel generieren
@@ -55,8 +55,8 @@ weights = gauss_2d(result_rot[:,1,:], result_rot[:,2,:], 0, 0, sigma)
 
 # AODFs Generieren
 AODFs = np.array([
-    Get_AODF_noRand_noCache_amp(ODFs,result, basis, weights,phi,theta,i,j,k, sigma=sigma, factor_amp=factor_amp, bands=bands)[0]
-    for i in tqdm(range(range_r, limit_x - range_r),desc='Schleife 1', leave=False)
+    Get_AODF_noRand_noCache(ODFs,result, basis, weights,phi,theta,i,j,k, sigma=sigma, factor_amp=factor_amp, bands=bands)
+    for i in tqdm(range(range_r, limit_x - range_r),desc='Schleife 1')
     for j in tqdm(range(range_r, limit_y - range_r),desc='Schleife 2', leave=False)
     for k in range(range_r, limit_z - range_r)
 ])
@@ -83,3 +83,4 @@ for i in range(AODFs.shape[2]):
     plt.subplots_adjust(top = 1, bottom = 0, right = 1, left = 0, hspace = 0, wspace = 0)
     plt.savefig(f"new_lib_PLI_600-650_900-950_{300+i+range_r}_AODF_b{bands}_s{int(sigma*10)}_c{coefficient}_famp{factor_amp}_n{number_of_winkel}_r{range_r}_fib_2.png", dpi=500)
     plt.clf()
+

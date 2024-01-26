@@ -9,7 +9,7 @@ number_of_winkel_array = np.array([1500,5000,10000,20000,50000,100000,200000])
 # Gaussfunktion Sigma
 sigma = 0.3
 # Faktor, welche Punkte in die AODFs eingehen
-factor_amp = 100
+factor_amp = 10
 # Faktor für die Größe der AODFs in der Visualisierung
 coefficient = 0.7
 # ODFs Generieren
@@ -40,7 +40,7 @@ ODFs = odf3.compute(field_theta[:,:,:,None], field_phi[:,:,:,None], mask, bands)
 limit_x, limit_y, limit_z = ODFs.shape[0],ODFs.shape[1],ODFs.shape[2] #20,20,20# 
 
 for number_of_winkel in number_of_winkel_array:
-    for count in range(3):
+    for count in range(10):
         AODFs = np.array([
             Get_AODF(ODFs,dict_4_10, dict_basis,factor,i,j,k, sigma=sigma, factor_amp=factor_amp, number_of_winkel=number_of_winkel)
             for i in tqdm(range(range_r, limit_x - range_r),desc='Schleife x', leave=False, ascii="░▒█")

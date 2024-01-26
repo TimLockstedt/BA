@@ -17,10 +17,9 @@ def genereate_divergence_(middle_x:int=4,middle_y:int=4,middle_z:int=4):
     for i in range(field_phi.shape[0]):
         for j in range(field_phi.shape[1]):
             for k in range(field_phi.shape[2]):
-                field_phi[i,j,k] = 0# np.arccos((k-middle_z)/np.linalg.norm([i-middle_x,j-middle_y,k-middle_z])) # np.arccos(k+20/np.linalg.norm([i+20,j+20,k+20]))
+                field_phi[i,j,k] = 0 # np.arccos((k-middle_z)/np.linalg.norm([i-middle_x,j-middle_y,k-middle_z])) # np.arccos(k+20/np.linalg.norm([i+20,j+20,k+20]))
                 field_theta[i,j,k] = np.arctan2(j-middle_y,i-middle_x)
     return(field_theta, field_phi)
-
 
 
 # Kegel länge
@@ -32,9 +31,9 @@ number_of_winkel = 1500
 # Gaussfunktion Sigma
 sigma = 0.3
 # Faktor, welche Punkte in die AODFs eingehen
-factor_amp = 100
+factor_amp = 10
 # Faktor für die Größe der AODFs in der Visualisierung
-coefficient = 0.7
+coefficient = 0.6
 # ODFs Generieren
 # Direction_image, Inclination_image, mask_image, rel_image = load_data(300, 310)
 # ODFs = odf3.compute(np.deg2rad(Direction_image)[:,:,:,None], np.deg2rad(Inclination_image)[:,:,:,None], mask_image[:,:,:,None], bands)[600:650,900:950,:,:]
@@ -55,11 +54,12 @@ result, basis = get_result_basis(range_r, bands, alpha, beta)
 result_rot = reverse_rotate_and_translate_data_noTranslation(result, alpha, beta)
 weights = gauss_2d(result_rot[:,1,:], result_rot[:,2,:], 0, 0, sigma)
 
+print(limit_x - 2*range_r,limit_y - 2*range_r,limit_z - 2*range_r)
 
 # AODFs Generieren
 AODFs = np.array([
     Get_AODF_noRand_noCache_amp(ODFs,result, basis, weights,phi,theta,i,j,k, sigma=sigma, factor_amp=factor_amp, bands=bands)[0]
-    for i in tqdm(range(range_r, limit_x - range_r),desc='Schleife x', leave=False, ascii="░▒█")
+    for i in tqdm(range(range_r, limit_x - range_r),desc='Schleife x', ascii="░▒█")
     for j in tqdm(range(range_r, limit_y - range_r),desc='Schleife y', leave=False, ascii=" ▖▘▝▗▚▞█")
     for k in range(range_r, limit_z - range_r)
 ])

@@ -62,7 +62,7 @@ weights = gauss_2d(result_rot[:,1,:], result_rot[:,2,:], 0, 0, sigma)
 # AODFs Generieren
 AODFs = np.array([
     Get_AODF_noRand_noCache(ODFs,result, basis, weights,phi,theta,i,j,k, sigma=sigma, factor_amp=factor_amp, bands=bands)
-    for i in tqdm(range(range_r, limit_x - range_r),desc='Schleife x', leave=False, ascii="░▒█")
+    for i in tqdm(range(range_r, limit_x - range_r),desc='Schleife x', ascii="░▒█")
     for j in tqdm(range(range_r, limit_y - range_r),desc='Schleife y', leave=False, ascii=" ▖▘▝▗▚▞█")
     for k in range(range_r, limit_z - range_r)
 ])
@@ -92,5 +92,5 @@ for i in tqdm(range(AODFs.shape[2]),desc='Generiere Bilder', leave=False):
     plt.xticks([])
     plt.yticks([])
     plt.subplots_adjust(top = 1, bottom = 0, right = 1, left = 0, hspace = 0, wspace = 0)
-    plt.savefig(f"new_lib_15Swirl_{i+range_r}_AODF_b{bands}_s{int(sigma*10)}_c{coefficient}_famp{factor_amp}_n{number_of_winkel}_r{range_r}_fib_2.png", dpi=1000)
+    plt.savefig(f"new_lib_15Swirl_{i+range_r}_AODF_b{bands}_s{int(sigma*10)}_c{coefficient}_famp{factor_amp}_n{number_of_winkel}_r{range_r}_fib_2_newAmp1.png", dpi=1000)
     plt.clf()

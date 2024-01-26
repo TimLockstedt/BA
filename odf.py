@@ -350,7 +350,7 @@ def visualize_odf(coefficients, n_phi, n_theta, scale=1, fig=None, ax=None):
     ax.plot_surface(x, y, z, color="b", alpha=0.5)
     if flag:
         _set_axes_equal(ax)
-
+    
     return fig, ax
 
 
@@ -369,7 +369,7 @@ def _analytic_odf(cos_theta: np.ndarray, sin_theta: np.ndarray, phi: np.ndarray,
     for b in np.arange(0, bands + 1, 1):
         for o in np.arange(-b, b + 1, 1):
             real_sph_harm[i] = np.sum(
-                _sh.sph_harm(b, o, cos_theta, sin_theta, phi)) / phi.size
+                _sh.spherical_harmonics(b, o, cos_theta, sin_theta, phi)) / phi.size
             i += 1
 
     return real_sph_harm

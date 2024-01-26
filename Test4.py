@@ -67,7 +67,7 @@ plt.show()
 
 Amps = np.reshape(Amps, (5,5,5,1500))
 
-for i in range(5):
+for i in range(5): 
     x = Amps[i,2,3,:] * np.cos(phi) * np.sin(theta)
     y = Amps[i,2,3,:] * np.sin(phi) * np.sin(theta)
     z = Amps[i,2,3,:] * np.cos(theta)

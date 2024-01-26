@@ -33,7 +33,7 @@ phi_ = np.arctan2(y,x)
 x_ = np.cos(phi_) * np.sin(theta_)
 y_ = np.sin(phi_) * np.sin(theta_)
 z_ = np.cos(theta_)
-
+ 
 origin = [0,0,0]
 X, Y, Z = zip(origin,origin,origin) 
 # U, V, W = zip(p0,p1,p2)

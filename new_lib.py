@@ -14,7 +14,7 @@ import h5py
 from tqdm import tqdm
 import h5py
 import vispy_odf
- 
+
 def alpha_to_phi(alpha:np.ndarray, beta:np.ndarray):
     x = (np.cos(beta))
     y = (np.sin(alpha)*np.sin(beta))
@@ -61,6 +61,11 @@ def koords_in_kegel(range_r = 4, alpha = np.array([]), beta = np.array([])):
                 (0 < (casb*z_grid+sasb*y_grid+cb*x_grid)) & 
                 (range_r**2 > ((casb*z_grid+sasb*y_grid+cb*x_grid)**2 +(ca*y_grid-sa*z_grid)**2 + (cacb*z_grid-sb*x_grid+sacb*y_grid)**2))
                 )
+        # mask = (
+        #         ((ca*y_grid-sa*z_grid)**2 + (cacb*z_grid-sb*x_grid+sacb*y_grid)**2 < (casb*z_grid+sasb*y_grid+cb*x_grid)**2) & 
+        #         (0 < (casb*z_grid+sasb*y_grid+cb*x_grid)) & 
+        #         (range_r > (casb*z_grid+sasb*y_grid+cb*x_grid))
+        #         )
         # x,y,z werte mit der spezifischen Maske auf die Kegel zuschneiden
         x_mask = x_grid[mask]
         y_mask = y_grid[mask]
@@ -227,29 +232,9 @@ def kegel_from_dict_withBasis(dict_cache:dict, dict_cache_basis:dict, factor:int
     return result, res_basis
 
 
-def get_amplitude(result: np.ndarray, ODFs: np.ndarray, basis: np.ndarray, weights: np.ndarray) -> np.ndarray:
-    return np.array([
-        (np.sum(
-            np.dot(
-                basis[None, i],
-                np.dot(
-                    weights[i, ~np.isnan(res)[0]][None, :],
-                    ODFs[
-                        tuple(np.reshape(np.array(res[~np.isnan(res)], int), (3, -1)))
-                    ]
-                ).T
-            ).item() / np.reshape(np.array(res[~np.isnan(res)], int), (3, -1)).shape[-1]
-            ) 
-        )
-        for i, res in enumerate(result)
-    ])
-
-
-
-
 # def get_amplitude(result: np.ndarray, ODFs: np.ndarray, basis: np.ndarray, weights: np.ndarray) -> np.ndarray:
 #     return np.array([
-#         (
+#         (np.sum(
 #             np.dot(
 #                 basis[None, i],
 #                 np.dot(
@@ -259,13 +244,35 @@ def get_amplitude(result: np.ndarray, ODFs: np.ndarray, basis: np.ndarray, weigh
 #                     ]
 #                 ).T
 #             ).item() / np.reshape(np.array(res[~np.isnan(res)], int), (3, -1)).shape[-1]
-#         ) if np.reshape(np.array(res[~np.isnan(res)], int), (3, -1)).shape[-1] > 0
-#         else 0
+#             ) 
+#         )
 #         for i, res in enumerate(result)
 #     ])
 
-        # phi = np.arccos(z)
-        # theta = np.arctan2(y,x)
+# def get_amplitude(result: np.ndarray, ODFs: np.ndarray, basis: np.ndarray, weights: np.ndarray) -> np.ndarray:
+#     return np.array([
+#         (np.einsum('ij,ik,kj->', basis[None, i], 
+#                     weights[i, ~np.isnan(res)[0]][None, :],
+#                     ODFs[
+#                         tuple(np.reshape(np.array(res[~np.isnan(res)], int), (3, -1)))
+#                     ]
+#                     )/ np.reshape(np.array(res[~np.isnan(res)], int), (3, -1)).shape[-1]
+#         )
+#         for i, res in enumerate(result)
+    # ])
+
+
+def get_amplitude(result: np.ndarray, ODFs: np.ndarray, basis: np.ndarray, weights: np.ndarray) -> np.ndarray:
+    nan_mask = np.isnan(result)
+    weights[nan_mask[:,0,:]] = 0
+    result_ = np.array(np.copy(result), dtype=int)
+    result_[nan_mask] = 0
+    Masked_ODFs = ODFs[result_[:,0,:],result_[:,1,:],result_[:,2,:]]
+    Amplituden = np.einsum("ni,nj,nji -> n", basis, 
+                    weights,
+                    Masked_ODFs
+                    )/np.sum(~nan_mask[:,0,:], axis=1)
+    return Amplituden
 
 
 def get_basis_xyz_new(x:int, y:int, z:int, band:int=10, factor:int=10):
@@ -635,7 +642,7 @@ def Get_AODF_noRand_noCache_amp(ODFs:np.ndarray, result:np.ndarray, basis:np.nda
     AODF_d = odf.compute(np.ravel(multiple_dir[nan_mask]),np.ravel(multiple_inc[nan_mask]), np.ones(np.ravel(multiple_inc[nan_mask]).shape), bands)
     return (AODF_d, AODF_Amplitude)
 
-
+## Von https://stackoverflow.com/questions/9600801/evenly-distributing-n-points-on-a-sphere
 def fibonacci_sphere(samples=1000):
 
     points = []

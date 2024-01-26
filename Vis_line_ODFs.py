@@ -31,7 +31,7 @@ number_of_winkel = 1500
 # Gaussfunktion Sigma
 sigma = 0.3
 # Faktor, welche Punkte in die AODFs eingehen
-factor_amp = 1
+factor_amp = 100
 # Faktor für die Größe der AODFs in der Visualisierung
 coefficient = 0.2
 # ODFs Generieren
@@ -51,14 +51,14 @@ for i in tqdm(range(ODFs.shape[2]),desc='Generiere Bilder', leave=False):
     print(odf_coeff.shape)
     odf_coeff = odf_coeff[:, :, i, :].squeeze()
     print(odf_coeff.shape)
-
-    image = vispy_odf.render_scene(odf_coeff*coefficient)
-    plt.imshow(image)
-    plt.xticks([])
-    plt.yticks([])
-    plt.subplots_adjust(top = 1, bottom = 0, right = 1, left = 0, hspace = 0, wspace = 0)
-    plt.savefig(f"new_lib_line{i}_ODF_b{bands}_s{int(sigma*10)}_c{coefficient}_famp{factor_amp}_n{number_of_winkel}_r{range_r}_fib_2_noInc.png", dpi=500)
-    plt.clf()
+    for j in range(10):
+        image = vispy_odf.render_scene(odf_coeff*coefficient)
+        plt.imshow(image)
+        plt.xticks([])
+        plt.yticks([])
+        plt.subplots_adjust(top = 1, bottom = 0, right = 1, left = 0, hspace = 0, wspace = 0)
+        plt.savefig(f"new_lib_line{i}_ODF_b{bands}_s{int(sigma*10)}_c{coefficient}_famp{factor_amp}_n{number_of_winkel}_r{range_r}_fib_2_noInc_try{j}.png", dpi=500)
+        plt.clf()
 
 # field_theta, field_phi = genereate_divergence_()
 # # field_theta[20,:,:] = 0
